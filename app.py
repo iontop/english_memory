@@ -107,6 +107,12 @@ def seed_initial_data(conn):
 
     conn.commit()
 
+# Ensure database and seed data are initialized automatically on app launch (Gunicorn & Flask)
+try:
+    init_db()
+except Exception as _db_err:
+    print("Database initialization notice:", _db_err)
+
 
 def fetch_naver_dictionary(word_query):
     """
