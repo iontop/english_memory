@@ -100,7 +100,7 @@ const app = {
         // Manager State
         managerSetId: null,
 
-        // Audio Rate & Gamification State (v0.4.0)
+        // Audio Rate & Gamification State (v0.5.0)
         audioRate: 1.0,
         streakDays: 1,
         quizTimerMode: 'none',
@@ -118,7 +118,7 @@ const app = {
     },
 
     init: function() {
-        console.log("Initializing English Memory App v0.4.0 with API:", API_BASE_URL);
+        console.log("Initializing English Memory App v0.5.0 with API:", API_BASE_URL);
         this.initTheme();
         this.initMobileAudioUnlock();
         this.initBookmarks();
@@ -132,7 +132,7 @@ const app = {
 
     registerServiceWorker: function() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=0.4.0').catch(() => {});
+            navigator.serviceWorker.register('./sw.js?v=0.5.0').catch(() => {});
         }
         if (window.IndexedDBEngine) {
             window.IndexedDBEngine.init();

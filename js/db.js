@@ -1,4 +1,4 @@
-// IndexedDB Engine for English Memory (v0.4.0)
+// IndexedDB Engine for English Memory (v0.5.0)
 const DB_NAME = 'EnglishMemoryDB';
 const DB_VERSION = 1;
 
