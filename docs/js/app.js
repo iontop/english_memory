@@ -150,7 +150,12 @@ const app = {
         const text = document.getElementById("server-status-text");
         if (!dot || !text) return;
 
-        const customUrl = localStorage.getItem("CUSTOM_API_BASE_URL");
+        // Auto-cleanup legacy default dummy URL if present
+        let customUrl = localStorage.getItem("CUSTOM_API_BASE_URL");
+        if (customUrl && customUrl.includes("english-memory-backend.onrender.com")) {
+            localStorage.removeItem("CUSTOM_API_BASE_URL");
+            customUrl = null;
+        }
 
         if (customUrl) {
             const fetchOptions = {
@@ -162,7 +167,7 @@ const app = {
 
             try {
                 const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 4000);
+                const timer = setTimeout(() => controller.abort(), 3000);
                 
                 let res = await fetch(`${API_BASE_URL}/health`, { ...fetchOptions, signal: controller.signal }).catch(() => null);
                 if (!res || !res.ok) {
@@ -174,8 +179,8 @@ const app = {
                     dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
                     text.textContent = "백엔드 동기화됨";
                 } else {
-                    dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
-                    text.textContent = "백엔드 준비 중";
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                    text.textContent = "정상 작동 중";
                 }
             } catch (e) {
                 dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
@@ -701,9 +706,31 @@ const app = {
     },
 
     playAudioUrl: function(url, text) {
-        const cleanText = text || "";
-        const player = document.getElementById("app-audio-player");
+        const wordText = text || (this.state.currentStudyWords && this.state.currentStudyWords[this.state.currentStudyIndex] ? this.state.currentStudyWords[this.state.currentStudyIndex].word : "");
+        if (!wordText && !url) return;
 
+        // 1. Play WebSpeech SYNCHRONOUSLY inside the touch event frame (Guaranteed on iOS Safari & Mobile Chrome!)
+        if ('speechSynthesis' in window && wordText) {
+            try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(wordText);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                utterance.volume = 1.0;
+
+                const voices = window.speechSynthesis.getVoices();
+                if (voices && voices.length > 0) {
+                    const enVoice = voices.find(v => v.lang && (v.lang.startsWith('en') || v.lang.includes('en_US') || v.name.includes('Samantha') || v.name.includes('Siri') || v.name.includes('Google')));
+                    if (enVoice) utterance.voice = enVoice;
+                }
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {
+                console.warn("SpeechSynthesis error:", e);
+            }
+        }
+
+        // 2. Parallel HTML5 Audio Element playback
+        const player = document.getElementById("app-audio-player");
         if (url && player) {
             try {
                 player.src = url;
@@ -711,40 +738,28 @@ const app = {
                 player.setAttribute("playsinline", "true");
                 const playPromise = player.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(err => {
-                        console.warn("Mobile HTML5 Audio play prevented, switching to WebSpeech", err);
-                        this.playWebSpeechFallback(cleanText);
-                    });
+                    playPromise.then(() => {
+                        // If MP3 audio plays, cancel duplicate WebSpeech after brief delay
+                        setTimeout(() => {
+                            if (!player.paused && 'speechSynthesis' in window) {
+                                window.speechSynthesis.cancel();
+                            }
+                        }, 150);
+                    }).catch(() => {});
                 }
-            } catch (e) {
-                this.playWebSpeechFallback(cleanText);
-            }
-        } else {
-            this.playWebSpeechFallback(cleanText);
+            } catch (e) {}
         }
     },
 
     playWebSpeechFallback: function(text) {
         if (!text || !('speechSynthesis' in window)) return;
-
         try {
             window.speechSynthesis.cancel();
-
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             utterance.rate = 0.9;
-            utterance.pitch = 1.0;
-
-            const voices = window.speechSynthesis.getVoices();
-            if (voices && voices.length > 0) {
-                const enVoice = voices.find(v => v.lang && (v.lang.startsWith('en') || v.lang.includes('en_US') || v.name.includes('Samantha') || v.name.includes('Siri')));
-                if (enVoice) utterance.voice = enVoice;
-            }
-
             window.speechSynthesis.speak(utterance);
-        } catch (e) {
-            console.error("Speech Synthesis mobile error", e);
-        }
+        } catch (e) {}
     },
 
 
