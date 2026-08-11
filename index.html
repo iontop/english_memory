@@ -62,11 +62,20 @@
                 </button>
             </nav>
 
-            <!-- Backend Server Status Indicator -->
-            <div onclick="app.promptCustomServerUrl()" class="flex items-center space-x-2 bg-slate-900/80 hover:bg-slate-800 px-3.5 py-1.5 rounded-full border border-pink-500/30 text-xs cursor-pointer transition shadow-sm" title="클릭하여 Render 백엔드 서버 URL 변경">
-                <span id="server-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="server-status-text" class="text-pink-200 font-semibold">연결됨</span>
-                <i class="fa-solid fa-gear text-pink-400/60 text-[10px]"></i>
+            <!-- Right Side Controls: Theme Switcher & Backend Status -->
+            <div class="flex items-center space-x-2">
+                <!-- Light / Dark Theme Toggle Button -->
+                <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="px-3 py-1.5 rounded-full bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 text-xs font-bold text-pink-400 transition flex items-center gap-1.5 shadow-sm" title="다크 / 라이트 모드 테마 변경">
+                    <span id="theme-toggle-icon">🌙</span>
+                    <span id="theme-toggle-text" class="hidden sm:inline">다크 모드</span>
+                </button>
+
+                <!-- Backend Server Status Indicator -->
+                <div onclick="app.promptCustomServerUrl()" class="flex items-center space-x-2 bg-slate-900/80 hover:bg-slate-800 px-3.5 py-1.5 rounded-full border border-pink-500/30 text-xs cursor-pointer transition shadow-sm" title="클릭하여 Render 백엔드 서버 URL 변경">
+                    <span id="server-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="server-status-text" class="text-pink-200 font-semibold">연결됨</span>
+                    <i class="fa-solid fa-gear text-pink-400/60 text-[10px]"></i>
+                </div>
             </div>
         </div>
 

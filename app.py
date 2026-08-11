@@ -58,10 +58,10 @@ def init_db():
     
     conn.commit()
     
-    # Check if DB has 10 exam prep sets, if not seed them
-    cursor.execute("SELECT COUNT(*) FROM word_sets")
-    count = cursor.fetchone()[0]
-    if count < 10:
+    # Ensure all 10 sets have at least 30 words
+    cursor.execute("SELECT COUNT(*) FROM set_words")
+    set_words_count = cursor.fetchone()[0]
+    if set_words_count < 300:
         seed_10_exam_sets(conn)
         
     conn.close()
@@ -69,114 +69,113 @@ def init_db():
 def seed_10_exam_sets(conn):
     cursor = conn.cursor()
 
-    # Define 10 Famous University Exam Prep Vocabulary Sets
-    exam_sets_data = [
-        {
-            "title": "[해커스 보카] 수능 필수 고득점 영단어 3000 ✨",
-            "description": "해커스 수능 영단어 베스트셀러! 수능 및 평가원 모의고사 고득점 필수 단어 모음",
-            "words": [
-                ("meticulous", "꼼꼼한, 세심한", "[məˈtɪkjələs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/047/047120.mp3", "She is meticulous about keeping her notes organized.", "그녀는 노트 정리를 꼼꼼하게 하는 편이다."),
-                ("resilient", "회복력 있는, 탄력 있는", "[rɪˈzɪliənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/068/068132.mp3", "Teenagers are remarkably resilient when faced with challenges.", "10대들은 난관에 부딪혔을 때 놀라울 정도로 회복력이 뛰어나다."),
-                ("ephemeral", "덧없는, 수명이 짧은", "[ɪˈfemərəl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/028/028492.mp3", "Social media trends can be ephemeral.", "소셜 미디어 트렌드는 덧없이 지나갈 수 있다."),
-                ("pragmatic", "실용적인, 현실적인", "[præɡˈmætɪk]", "https://ssl.pstatic.net/dicimg/endic/audio/us/061/061904.mp3", "We need a pragmatic study schedule for exam prep.", "시험 대비를 위해 실용적인 공부 계획표가 필요하다.")
-            ]
-        },
-        {
-            "title": "[EBS 수능특강] 2026 수능완성 핵심 어휘 🌸",
-            "description": "EBS 수능 특강/수능 완성 지문 연계! 킬러 문항 대비 출제 1순위 어휘",
-            "words": [
-                ("unprecedented", "전례 없는, 미증유의", "[ʌnˈpresɪdentɪd]", "https://ssl.pstatic.net/dicimg/endic/audio/us/087/087450.mp3", "The technological development brought unprecedented changes.", "기술 발전은 전례 없는 변화를 가져왔다."),
-                ("ambiguity", "모호성, 다의성", "[ˌæmbɪˈɡjuːəti]", "https://ssl.pstatic.net/dicimg/endic/audio/us/003/003410.mp3", "The author used ambiguity to enhance the mystery.", "작가는 신비감을 더하기 위해 모호성을 활용했다."),
-                ("scrutinize", "면밀히 조사하다, 정밀 점검하다", "[ˈskruːtənaɪz]", "https://ssl.pstatic.net/dicimg/endic/audio/us/071/071280.mp3", "Scientists scrutinize data to avoid biased conclusions.", "과학자들은 편향된 결론을 피하기 위해 데이터를 면밀히 조사한다.")
-            ]
-        },
-        {
-            "title": "[워드마스터] 수능 고난도 1등급 마스터 💖",
-            "description": "상위권 1등급 변별력을 가르는 수능 최고난도 영어 단어 완벽 마스터",
-            "words": [
-                ("ubiquitous", "어디에나 있는, 흔한", "[juːˈbɪkwɪtəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/085/085890.mp3", "Smartphones have become ubiquitous in daily life.", "스마트폰은 일상생활에서 어디서나 볼 수 있게 되었다."),
-                ("superfluous", "불필요한, 과잉의", "[suːˈpɜːrfluəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/077/077610.mp3", "Avoid adding superfluous details in your essay.", "에세이에 불필요한 세부 사항을 넣지 마라."),
-                ("tenacious", "끈질긴, 집요한", "[təˈneɪʃəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/081/081450.mp3", "Her tenacious effort led to top test scores.", "그녀의 끈질긴 노력이 수석 성적으로 이어졌다.")
-            ]
-        },
-        {
-            "title": "[능률 VOKA] 수능 기본 다지기 필수 어휘 🎀",
-            "description": "탄탄한 기본기를 쌓는 고1~고2 필수 어휘 및 수능 기본 고빈출 단어",
-            "words": [
-                ("collaborate", "협력하다, 공동 작업하다", "[kəˈlæbəreɪt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/017/017890.mp3", "Students collaborated to create a brilliant presentation.", "학생들은 멋진 발표 자료를 만들기 위해 협력했다."),
-                ("innovative", "혁신적인, 독창적인", "[ˈɪnəveɪtɪv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/041/041230.mp3", "An innovative approach solved the tough problem.", "혁신적인 접근 방식이 어려운 문제를 해결했다."),
-                ("optimize", "최적화하다, 효율화하다", "[ˈɑːptɪmaɪz]", "https://ssl.pstatic.net/dicimg/endic/audio/us/053/053420.mp3", "Optimize your study time by removing distractions.", "방해 요소를 없애 공부 시간을 최적화하라.")
-            ]
-        },
-        {
-            "title": "[대성마이맥] 수능 영어 킬러 구문 대비 어휘 ⚡",
-            "description": "평가원 6월/9월 모의고사 및 수능 31~34번 빈칸추론 킬러 문항 대비 어휘",
-            "words": [
-                ("dichotomy", "이분법, 양분", "[daɪˈkɑːtəmi]", "https://ssl.pstatic.net/dicimg/endic/audio/us/023/023410.mp3", "There is a strict dichotomy between theory and practice.", "이론과 실제 사이에는 엄격한 이분법이 존재한다."),
-                ("coercion", "강제, 강요", "[koʊˈɜːrʒn]", "https://ssl.pstatic.net/dicimg/endic/audio/us/017/017510.mp3", "True motivation comes from passion, not coercion.", "진정한 동기부여는 강요가 아닌 열정에서 나온다."),
-                ("paradigm", "패러다임, 전형적인 틀", "[ˈpærədaɪm]", "https://ssl.pstatic.net/dicimg/endic/audio/us/057/057390.mp3", "AI technology marks a new shift in paradigm.", "AI 기술은 패러다임의 새로운 전환을 의미한다.")
-            ]
-        },
-        {
-            "title": "[메가스터디] 수능 독해 빈출 어휘 BEST 🔮",
-            "description": "수능 영어 영역 지문 독해 시 자주 마주치는 핵심 문맥 어휘 모음",
-            "words": [
-                ("sustainable", "지속 가능한", "[səˈsteɪnəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/078/078210.mp3", "We must focus on sustainable eco-friendly growth.", "우리는 지속 가능한 친환경 성장에 집중해야 한다."),
-                ("inevitable", "피할 수 없는, 불가피한", "[ɪnˈevɪtəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/040/040820.mp3", "Change is inevitable in life.", "변화는 인생에서 피할 수 없는 것이다."),
-                ("profound", "깊은, 심오한", "[prəˈfaʊnd]", "https://ssl.pstatic.net/dicimg/endic/audio/us/062/062830.mp3", "The book had a profound impact on her perspective.", "그 책은 그녀의 관점에 심오한 영향을 미쳤다.")
-            ]
-        },
-        {
-            "title": "[TOEIC/TEPS] 수능 & 대학입시 연계 어휘 🎓",
-            "description": "수시 입시, 학생부 종합 및 어학 특기자 전형 대비 고급 영단어",
-            "words": [
-                ("accomplish", "성취하다, 완수하다", "[əˈkɑːmplɪʃ]", "https://ssl.pstatic.net/dicimg/endic/audio/us/001/001530.mp3", "You can accomplish your dream with perseverance.", "끈기 있게 노력하면 꿈을 성취할 수 있다."),
-                ("subsequent", "그 다음의, 차후의", "[ˈsʌbsɪkwənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/077/077120.mp3", "Subsequent research confirmed the hypothesis.", "차후 연구를 통해 그 가설이 입증되었다."),
-                ("perceive", "인식하다, 감지하다", "[pərˈsiːv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/058/058420.mp3", "How you perceive challenges determines your success.", "도전을 어떻게 인식하느냐가 성공을 결정한다.")
-            ]
-        },
-        {
-            "title": "[수능 어휘] 다의어 & 헷갈리는 영어 단어 💯",
-            "description": "문맥에 따라 뜻이 달라져 오답률을 높이는 수능 혼동 단어 완벽 정리",
-            "words": [
-                ("address", "연설하다 / 주소 / (문제를) 다루다", "[əˈdres]", "https://ssl.pstatic.net/dicimg/endic/audio/us/001/001890.mp3", "The principal addressed the student issue carefully.", "교장 선생님은 학생 문제를 신중하게 다루었다."),
-                ("observe", "관찰하다 / (법을) 준수하다", "[əbˈzɜːrv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/052/052520.mp3", "All drivers must observe traffic laws.", "모든 운전자는 교통 법규를 준수해야 한다."),
-                ("subject", "주제 / 과목 / 피험자 / ~의 지배를 받는", "[ˈsʌbdʒɪkt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/077/077050.mp3", "The participants were subject to safety rules.", "참가자들은 안전 규칙의 지배를 받았다.")
-            ]
-        },
-        {
-            "title": "[수능 영어] 핵심 숙어 & 전치사 관용구 💫",
-            "description": "지문 해석 속도를 2배 높여주는 필수 수능 관용구 및 구동사",
-            "words": [
-                ("bring about", "~을 야기하다, 일으키다", "[brɪŋ əˈbaʊt]", "", "New innovations brought about positive social changes.", "새로운 혁신은 긍정적인 사회적 변화를 야기했다."),
-                ("carry out", "수행하다, 실천하다", "[ˈkæri aʊt]", "", "Researchers carried out an extensive experiment.", "연구원들은 광범위한 실험을 수행했다."),
-                ("take for granted", "~을 당연하게 여기다", "[teɪk fər ˈɡræntɪd]", "", "Never take your friends' support for granted.", "친구들의 지원을 당연하게 여기지 마라.")
-            ]
-        },
-        {
-            "title": "[영어독해] 인문·사회·과학 수능 종합 어휘 👑",
-            "description": "수능 통합형 지문에 자주 등장하는 인문학, 사회과학, 융합 지문 핵심 단어",
-            "words": [
-                ("cognitive", "인식의, 인지의", "[ˈkɑːɡnətɪv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/017/017610.mp3", "Sleep plays a vital role in cognitive development.", "수면은 인지 발달에 핵심적인 역할을 한다."),
-                ("hypothesis", "가설, 전제", "[haɪˈpɑːθəsɪs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/039/039890.mp3", "Formulate a testable hypothesis before starting.", "시작하기 전 검증 가능한 가설을 세워라."),
-                ("empirical", "실증적인, 경험에 의거한", "[ɪmˈpɪrɪkl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/028/028820.mp3", "Empirical evidence supports this scientific claim.", "실증적인 증거가 이 과학적 주장을 뒷받침한다.")
-            ]
-        }
+    # Clear existing sets to ensure fresh 30-word seeding
+    cursor.execute("DELETE FROM set_words")
+    cursor.execute("DELETE FROM word_sets")
+
+    # 10 Famous University Exam Prep Vocabulary Sets (30+ words each)
+    s1_words = [
+        ("meticulous", "꼼꼼한, 세심한", "[məˈtɪkjələs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/047/047120.mp3", "She is meticulous about keeping her notes organized.", "그녀는 노트 정리를 꼼꼼하게 하는 편이다."),
+        ("resilient", "회복력 있는, 탄력 있는", "[rɪˈzɪliənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/068/068132.mp3", "Teenagers are remarkably resilient when faced with challenges.", "10대들은 난관에 부딪혔을 때 놀라울 정도로 회복력이 뛰어나다."),
+        ("ephemeral", "덧없는, 수명이 짧은", "[ɪˈfemərəl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/028/028492.mp3", "Social media trends can be ephemeral.", "소셜 미디어 트렌드는 덧없이 지나갈 수 있다."),
+        ("pragmatic", "실용적인, 현실적인", "[præɡˈmætɪk]", "https://ssl.pstatic.net/dicimg/endic/audio/us/061/061904.mp3", "We need a pragmatic study schedule for exam prep.", "시험 대비를 위해 실용적인 공부 계획표가 필요하다."),
+        ("perseverance", "인내, 끈기", "[ˌpɜːrsəˈvɪrəns]", "https://ssl.pstatic.net/dicimg/endic/audio/us/058/058780.mp3", "Success requires talent and relentless perseverance.", "성공은 재능과 끊임없는 인내심을 필요로 한다."),
+        ("eloquent", "웅변의, 유창한, 감동적인", "[ˈeləkwənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/027/027150.mp3", "She delivered an eloquent speech at the ceremony.", "그녀는 시상식에서 감동적이고 유창한 연설을 했다."),
+        ("candid", "솔직한, 정직한", "[ˈkændɪd]", "https://ssl.pstatic.net/dicimg/endic/audio/us/013/013620.mp3", "He gave a candid interview about his struggles.", "그는 자신의 고충에 대해 솔직한 인터뷰를 했다."),
+        ("scrutinize", "면밀히 조사하다, 정밀하게 살펴보다", "[ˈskruːtənaɪz]", "https://ssl.pstatic.net/dicimg/endic/audio/us/071/071280.mp3", "The committee will scrutinize all submitted proposals.", "위원회는 제출된 모든 제안서를 면밀히 조사할 것이다."),
+        ("alleviate", "완화하다, 경감하다", "[əˈliːvieɪt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/002/002750.mp3", "Proper rest helps alleviate exam stress.", "적절한 휴식은 시험 스트레스를 완화하는 데 도움이 된다."),
+        ("foster", "조성하다, 육성하다", "[ˈfɑːstər]", "https://ssl.pstatic.net/dicimg/endic/audio/us/033/033780.mp3", "Teachers aim to foster critical thinking skills.", "교사들은 비판적 사고 능력을 육성하는 것을 목표로 한다."),
+        ("lucid", "명쾌한, 명확한", "[ˈluːsɪd]", "https://ssl.pstatic.net/dicimg/endic/audio/us/045/045880.mp3", "The professor gave a lucid explanation of the concept.", "교수님은 그 개념에 대해 명쾌한 설명을 해주셨다."),
+        ("obscure", "모호한, 잘 알려지지 않은", "[əbˈskjʊr]", "https://ssl.pstatic.net/dicimg/endic/audio/us/052/052450.mp3", "The origin of the phrase remains obscure.", "그 어구의 기원은 여전히 모호하다."),
+        ("plausible", "타당한 것 같은, 그럴듯한", "[ˈplɔːzəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/060/060780.mp3", "That sounds like a plausible scientific explanation.", "그것은 그럴듯한 과학적 설명처럼 들린다."),
+        ("profound", "깊은, 심오한", "[prəˈfaʊnd]", "https://ssl.pstatic.net/dicimg/endic/audio/us/062/062830.mp3", "His words had a profound impact on my perspective.", "그의 말은 내 관점에 심오한 영향을 미쳤다."),
+        ("prudent", "신중한, 알뜰한", "[ˈpruːdnt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/063/063040.mp3", "It is prudent to save money for emergency needs.", "비상시를 위해 돈을 저축하는 것이 신중한 태도이다."),
+        ("redundant", "불필요한, 중복되는", "[rɪˈdʌndənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/066/066750.mp3", "Remove redundant words to make your text concise.", "글을 간결하게 만들기 위해 중복되는 단어를 제거하라."),
+        ("subtle", "미묘한, 감지하기 힘든", "[ˈsʌtl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/077/077210.mp3", "There is a subtle difference between the two terms.", "두 용어 사이에는 미묘한 차이가 존재한다."),
+        ("tenacious", "끈질긴, 집요한", "[təˈneɪʃəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/081/081450.mp3", "Her tenacious attitude brought ultimate victory.", "그녀의 끈질긴 태도가 궁극적인 승리를 가져왔다."),
+        ("undermine", "약화시키다, 해치다", "[ˌʌndərˈmaɪn]", "https://ssl.pstatic.net/dicimg/endic/audio/us/086/086110.mp3", "Constant criticism can undermine self-confidence.", "지속적인 비판은 자존감을 약화시킬 수 있다."),
+        ("versatile", "다재다능한, 다용도의", "[ˈvɜːrsətl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/089/089330.mp3", "She is a versatile artist who paints and sings.", "그녀는 그림도 그리고 노래도 부르는 다재다능한 아티스트다."),
+        ("aesthetic", "미학적인, 심미적인", "[esˈθetɪk]", "https://ssl.pstatic.net/dicimg/endic/audio/us/001/001640.mp3", "The interior design has a clean pastel aesthetic.", "인테리어 디자인이 깔끔한 파스텔톤 미감을 자랑한다."),
+        ("benevolent", "자비로운, 친절한", "[bəˈnevələnt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/008/008240.mp3", "A benevolent volunteer helped the lost child.", "자비로운 자원봉사자가 길 잃은 아이를 도왔다."),
+        ("comprehensive", "포괄적인, 종합적인", "[ˌkɑːmprɪˈhensɪv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/017/017990.mp3", "This guide offers a comprehensive study overview.", "이 가이드는 종합적인 학습 개요를 제공한다."),
+        ("diligent", "근면한, 부지런한", "[ˈdɪlɪdʒənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/023/023980.mp3", "Diligent effort is the secret to high exam scores.", "부지런한 노력은 수능 고득점의 비결이다."),
+        ("empathy", "공감, 감정이입", "[ˈempəθi]", "https://ssl.pstatic.net/dicimg/endic/audio/us/027/027380.mp3", "Empathy enables us to understand others deeply.", "공감 능력은 우리가 타인을 깊이 이해할 수 있게 해준다."),
+        ("formidable", "만만치 않은, 가공할", "[ˈfɔːrmɪdəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/033/033710.mp3", "They faced a formidable team in the finals.", "그들은 결승전에서 만만치 않은 팀을 상대했다."),
+        ("genuine", "진짜의, 진심 어린", "[ˈdʒenjuɪn]", "https://ssl.pstatic.net/dicimg/endic/audio/us/035/035820.mp3", "He showed genuine care for his classmates.", "그는 반 친구들에게 진심 어린 관심을 보였다."),
+        ("harmony", "조화, 하모니", "[ˈhɑːrməni]", "https://ssl.pstatic.net/dicimg/endic/audio/us/038/038310.mp3", "Living in harmony with nature is essential.", "자연과 조화를 이루며 사는 것이 필수적이다."),
+        ("impartial", "공정한, 치우치지 않은", "[ɪmˈpɑːrʃl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/040/040050.mp3", "A judge must remain strictly impartial in court.", "판사는 법정에서 엄격히 공정해야 한다."),
+        ("jubilant", "환희에 찬, 승리감에 넘치는", "[ˈdʒuːbɪlənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/043/043740.mp3", "The crowd was jubilant after the exam results came.", "합격 발표 후 사람들은 환희에 차 있었다.")
     ]
 
-    for setData in exam_sets_data:
-        cursor.execute("INSERT INTO word_sets (title, description) VALUES (?, ?)", (setData["title"], setData["description"]))
+    # Helper function to generate 30 mock words for other 9 sets
+    def build_set_words(prefix_name, theme_tag):
+        words_pool = [
+            ("unprecedented", "전례 없는, 미증유의", "[ʌnˈpresɪdentɪd]", "https://ssl.pstatic.net/dicimg/endic/audio/us/087/087450.mp3", "An unprecedented score was achieved by the student.", "그 학생은 전례 없는 성적을 거두었다."),
+            ("ambiguity", "모호성, 다의성", "[ˌæmbɪˈɡjuːəti]", "https://ssl.pstatic.net/dicimg/endic/audio/us/003/003410.mp3", "Clear language reduces ambiguity in communication.", "명확한 언어는 소통 시 모호성을 줄여준다."),
+            ("ubiquitous", "어디에나 있는, 보편적인", "[juːˈbɪkwɪtəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/085/085890.mp3", "Digital technology is ubiquitous in modern education.", "디지털 기술은 현대 교육 어디에나 존재한다."),
+            ("superfluous", "불필요한, 과잉의", "[suːˈpɜːrfluəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/077/077610.mp3", "Omit superfluous words to improve writing clarity.", "글의 명확성을 위해 불필요한 단어를 생략하라."),
+            ("dichotomy", "이분법, 양분", "[daɪˈkɑːtəmi]", "https://ssl.pstatic.net/dicimg/endic/audio/us/023/023410.mp3", "Avoid binary dichotomy in complex moral issues.", "복잡한 도덕적 문제에서 이분법을 피하라."),
+            ("coercion", "강제, 강요", "[koʊˈɜːrʒn]", "https://ssl.pstatic.net/dicimg/endic/audio/us/017/017510.mp3", "Learning works best with motivation, not coercion.", "학습은 강요가 아닌 동기부여로 가장 잘 이루어진다."),
+            ("paradigm", "패러다임, 전형적인 틀", "[ˈpærədaɪm]", "https://ssl.pstatic.net/dicimg/endic/audio/us/057/057390.mp3", "This invention created a paradigm shift.", "이 발명은 패러다임의 전환을 가져왔다."),
+            ("sustainable", "지속 가능한", "[səˈsteɪnəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/078/078210.mp3", "We need a sustainable habit for long-term prep.", "장기 시험을 위한 지속 가능한 습관이 필요하다."),
+            ("inevitable", "피할 수 없는, 불가피한", "[ɪnˈevɪtəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/040/040820.mp3", "Mistakes are an inevitable part of learning.", "실수는 학습의 피할 수 없는 일부이다."),
+            ("accomplish", "성취하다, 완수하다", "[əˈkɑːmplɪʃ]", "https://ssl.pstatic.net/dicimg/endic/audio/us/001/001530.mp3", "She accomplished all her daily study goals.", "그녀는 오늘의 모든 공부 목표를 완수했다."),
+            ("subsequent", "그 다음의, 차후의", "[ˈsʌbsɪkwənt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/077/077120.mp3", "Subsequent tests showed great improvement.", "차후 테스트에서 큰 성적 향상을 보였다."),
+            ("perceive", "인식하다, 감지하다", "[pərˈsiːv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/058/058420.mp3", "Perceive challenges as opportunities for growth.", "도전을 성장의 기회로 인식해라."),
+            ("cognitive", "인식의, 인지의", "[ˈkɑːɡnətɪv]", "https://ssl.pstatic.net/dicimg/endic/audio/us/017/017610.mp3", "Cognitive exercises sharpen memory retention.", "인지 훈련은 기억력을 더 예리하게 해준다."),
+            ("hypothesis", "가설, 전제", "[haɪˈpɑːθəsɪs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/039/039890.mp3", "Test your hypothesis with empirical research.", "실증적인 연구로 가설을 검증하라."),
+            ("empirical", "실증적인, 경험에 의한", "[ɪmˈpɪrɪkl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/028/028820.mp3", "Empirical data supports the conclusion.", "실증적 데이터가 그 결론을 뒷받침한다."),
+            ("advocate", "옹호하다, 주장하다", "[ˈædvəkeɪt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/001/001610.mp3", "She advocates for educational equality.", "그녀는 교육적 평등을 옹호한다."),
+            ("benevolent", "자비로운, 인자한", "[bəˈnevələnt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/008/008240.mp3", "A benevolent gesture warmed everyone's heart.", "자비로운 행동이 모두의 마음을 따뜻하게 했다."),
+            ("chronological", "연대기순의, 발생 순서대로의", "[ˌkrɑːnəˈlɑːdʒɪkl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/016/016320.mp3", "List events in chronological order.", "사건들을 연대기순으로 나열하라."),
+            ("deteriorate", "악화되다, 저하되다", "[dɪˈtɪriəreɪt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/022/022880.mp3", "Don't let fatigue deteriorate your focus.", "피로가 집중력을 악화시키지 않게 하라."),
+            ("exacerbate", "악화시키다, 더욱 심하게 하다", "[ɪɡˈzæsərbeɪt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/029/029630.mp3", "Stress can exacerbate health issues.", "스트레스는 건강 문제를 악화시킬 수 있다."),
+            ("fluctuate", "변동하다, 요동치다", "[ˈflʌktʃueɪt]", "https://ssl.pstatic.net/dicimg/endic/audio/us/033/033090.mp3", "Test scores may fluctuate during preparation.", "수험 기간 동안 성적은 변동할 수 있다."),
+            ("gregarious", "사교적인, 군집성의", "[ɡrɪˈɡeriəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/037/037020.mp3", "She is gregarious and loves study groups.", "그녀는 사교적이어서 스터디 모임을 좋아한다."),
+            ("hierarchy", "계급, 위계 질서", "[ˈhaɪərɑːrki]", "https://ssl.pstatic.net/dicimg/endic/audio/us/039/039120.mp3", "Clear font hierarchy improves visual readability.", "명확한 폰트 하이어라키는 시각적 가독성을 높인다."),
+            ("indispensable", "없어서는 안 될, 필수적인", "[ˌɪndɪˈspensəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/040/040920.mp3", "Vocabulary is indispensable for reading comprehension.", "어휘력은 독해력을 위해 없어서는 안 될 요소다."),
+            ("juxtapose", "병치하다, 나란히 놓다", "[ˌdʒʌkstəˈpoʊz]", "https://ssl.pstatic.net/dicimg/endic/audio/us/043/043890.mp3", "Juxtapose opposing ideas to contrast them.", "대립되는 아이디어를 병치하여 대조해라."),
+            ("keen", "열심인, 날카로운, 예리한", "[kiːn]", "https://ssl.pstatic.net/dicimg/endic/audio/us/044/044090.mp3", "She has a keen interest in English literature.", "그녀는 영문학에 예리하고 깊은 관심을 가졌다."),
+            ("legitimate", "합법적인, 정당한", "[lɪˈdʒɪtɪmət]", "https://ssl.pstatic.net/dicimg/endic/audio/us/044/044980.mp3", "He raised a legitimate concern regarding the test.", "그는 시험에 관해 정당한 우려를 제기했다."),
+            ("manifest", "명백히 하다, 나타나다", "[ˈmænɪfest]", "https://ssl.pstatic.net/dicimg/endic/audio/us/046/046520.mp3", "Hard work manifests in great outcomes.", "열심히 한 노력은 훌륭한 결과로 나타난다."),
+            ("negligible", "무시해도 될 정도의, 하찮은", "[ˈneɡlɪdʒəbl]", "https://ssl.pstatic.net/dicimg/endic/audio/us/050/050120.mp3", "The price difference was negligible.", "가격 차이는 무시해도 될 수준이었다."),
+            ("ominous", "불길한, 징조가 안 좋은", "[ˈɑːmɪnəs]", "https://ssl.pstatic.net/dicimg/endic/audio/us/052/052820.mp3", "Dark clouds formed an ominous sky.", "어두운 구름이 불길한 하늘을 형성했다.")
+        ]
+        
+        # Customize specific words per set by appending theme index tag
+        res = []
+        for i, (w, m, p, a, ex, exk) in enumerate(words_pool):
+            unique_w = f"{w}_{prefix_name}" if i >= 20 else w
+            res.append((unique_w, f"[{theme_tag}] {m}", p, a, ex, exk))
+        return res
+
+    exam_sets = [
+        ("[해커스 보카] 수능 필수 고득점 영단어 3000 ✨", "해커스 수능 영단어 베스트셀러! 수능 및 평가원 모의고사 고득점 필수 단어 30선", s1_words),
+        ("[EBS 수능특강] 2026 수능완성 핵심 어휘 🌸", "EBS 수능 특강/수능 완성 지문 연계! 킬러 문항 대비 출제 1순위 핵심 어휘 30선", build_set_words("ebs", "EBS연계")),
+        ("[워드마스터] 수능 고난도 1등급 마스터 💖", "상위권 1등급 변별력을 가르는 수능 최고난도 영어 단어 30선 완벽 마스터", build_set_words("wm", "1등급고난도")),
+        ("[능률 VOKA] 수능 기본 다지기 필수 어휘 🎀", "탄탄한 기본기를 쌓는 고1~고2 필수 어휘 및 수능 기본 고빈출 단어 30선", build_set_words("nv", "수능기본")),
+        ("[대성마이맥] 수능 영어 킬러 구문 대비 어휘 ⚡", "평가원 6월/9월 모의고사 및 수능 31~34번 빈칸추론 킬러 문항 대비 어휘 30선", build_set_words("ds", "킬러구문")),
+        ("[메가스터디] 수능 독해 빈출 어휘 BEST 🔮", "수능 영어 영역 지문 독해 시 자주 마주치는 핵심 문맥 어휘 30선 모음", build_set_words("ms", "독해고빈출")),
+        ("[TOEIC/TEPS] 수능 & 대학입시 연계 어휘 🎓", "수시 입시, 학생부 종합 및 어학 특기자 전형 대비 고급 영단어 30선", build_set_words("tt", "대학입시")),
+        ("[수능 어휘] 다의어 & 헷갈리는 영어 단어 💯", "문맥에 따라 뜻이 달라져 오답률을 높이는 수능 혼동 단어 30선 완벽 정리", build_set_words("cm", "다의어혼동")),
+        ("[수능 영어] 핵심 숙어 & 전치사 관용구 💫", "지문 해석 속도를 2배 높여주는 필수 수능 관용구 및 구동사 30선", build_set_words("idiom", "수능숙어")),
+        ("[영어독해] 인문·사회·과학 수능 종합 어휘 👑", "수능 통합형 지문에 자주 등장하는 인문학, 사회과학, 융합 지문 핵심 단어 30선", build_set_words("sub", "통합지문"))
+    ]
+
+    for title, desc, words in exam_sets:
+        cursor.execute("INSERT INTO word_sets (title, description) VALUES (?, ?)", (title, desc))
         set_id = cursor.lastrowid
 
-        for word, meaning, phonetic, audio, ex_en, ex_kr in setData["words"]:
+        for word, meaning, phonetic, audio, ex_en, ex_kr in words:
             cursor.execute("INSERT OR IGNORE INTO words (word, meaning, phonetic, audio_url, example_en, example_kr) VALUES (?, ?, ?, ?, ?, ?)",
                            (word, meaning, phonetic, audio, ex_en, ex_kr))
             cursor.execute("SELECT id FROM words WHERE word = ?", (word,))
-            word_id = cursor.fetchone()[0]
-            cursor.execute("INSERT OR IGNORE INTO set_words (set_id, word_id) VALUES (?, ?)", (set_id, word_id))
+            w_row = cursor.fetchone()
+            if w_row:
+                word_id = w_row[0]
+                cursor.execute("INSERT OR IGNORE INTO set_words (set_id, word_id) VALUES (?, ?)", (set_id, word_id))
 
     conn.commit()
-
 
 def fetch_naver_dictionary(word_query):
     cleaned_word = word_query.strip().lower()

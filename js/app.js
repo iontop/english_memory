@@ -24,9 +24,39 @@ const app = {
     // Initialize application
     init: function() {
         console.log("Initializing English Memory App with API:", API_BASE_URL);
+        this.initTheme();
         this.checkServerHealth();
         this.loadWordSets();
         this.bindKeyboardShortcuts();
+    },
+
+    // Theme Switcher Engine (Light / Dark Mode)
+    initTheme: function() {
+        const savedTheme = localStorage.getItem("APP_THEME") || "light";
+        this.setTheme(savedTheme);
+    },
+
+    toggleTheme: function() {
+        const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        this.setTheme(newTheme);
+    },
+
+    setTheme: function(theme) {
+        const icon = document.getElementById("theme-toggle-icon");
+        const text = document.getElementById("theme-toggle-text");
+
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+            localStorage.setItem("APP_THEME", "dark");
+            if (icon) icon.textContent = "🌙";
+            if (text) text.textContent = "다크 모드";
+        } else {
+            document.documentElement.classList.remove("dark");
+            localStorage.setItem("APP_THEME", "light");
+            if (icon) icon.textContent = "☀️";
+            if (text) text.textContent = "라이트 모드";
+        }
     },
 
     // Check backend connection
