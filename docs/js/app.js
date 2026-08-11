@@ -38,13 +38,18 @@ const app = {
             if (res.ok) {
                 dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 text.textContent = "연결됨";
+            } else if (res.status === 502 || res.status === 503 || res.status === 504) {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+                text.textContent = "서버 시작 중 (Cold Start)...";
+                setTimeout(() => this.checkServerHealth(), 5000);
             } else {
                 dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
-                text.textContent = "응답 미흡";
+                text.textContent = `연결 상태 (${res.status})`;
             }
         } catch (e) {
-            dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
-            text.textContent = "오프라인/대기 중";
+            dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+            text.textContent = "서버 깨어나는 중...";
+            setTimeout(() => this.checkServerHealth(), 5000);
         }
     },
 

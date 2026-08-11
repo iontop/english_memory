@@ -1,31 +1,42 @@
 // Frontend API Configuration for GitHub Pages & Render
 const API_CONFIG = {
-    // Default Render production endpoint URL (Replace with your actual Render service URL)
+    // Default Render production endpoint URL
     PRODUCTION_API_BASE: "https://english-memory-backend.onrender.com/api",
     
+    // Normalize any URL input to ensure clean /api suffix
+    normalizeUrl: function(url) {
+        if (!url) return "";
+        let clean = url.trim();
+        if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+            clean = 'https://' + clean;
+        }
+        // Remove trailing slashes and trailing /api if present, then append clean /api
+        clean = clean.replace(/\/+$/, '');
+        if (clean.endsWith('/api')) {
+            clean = clean.substring(0, clean.length - 4);
+        }
+        return `${clean}/api`;
+    },
+
     // Get active API base URL based on environment
     getBaseUrl: function() {
-        // Check if user specified a custom Render backend URL in localStorage
         const customUrl = localStorage.getItem("CUSTOM_API_BASE_URL");
-        if (customUrl) return customUrl.endsWith('/api') ? customUrl : `${customUrl.replace(/\/$/, '')}/api`;
+        if (customUrl) return this.normalizeUrl(customUrl);
 
         const host = window.location.hostname;
         if (host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.")) {
             // Local Flask backend environment
             return `${window.location.origin}/api`;
         }
-        // GitHub Pages (iontop.github.io/english_memory) or external production environment
+        // GitHub Pages or external production environment
         return this.PRODUCTION_API_BASE;
     },
 
     // Utility to easily update backend Render URL from UI or console
     setBackendUrl: function(url) {
         if (url && url.trim()) {
-            let cleanUrl = url.trim();
-            if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-                cleanUrl = 'https://' + cleanUrl;
-            }
-            localStorage.setItem("CUSTOM_API_BASE_URL", cleanUrl);
+            const normalized = this.normalizeUrl(url);
+            localStorage.setItem("CUSTOM_API_BASE_URL", normalized);
         } else {
             localStorage.removeItem("CUSTOM_API_BASE_URL");
         }
