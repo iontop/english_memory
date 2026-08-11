@@ -655,6 +655,13 @@ const app = {
         const score = this.state.quizScore;
         const pct = Math.round((score / total) * 100);
 
+        const badgeEl = document.getElementById('result-badge-text');
+        if (badgeEl) {
+            if (pct === 100) badgeEl.textContent = '🎀 완벽해요! 100점 마스터! ✨';
+            else if (pct >= 80) badgeEl.textContent = '💖 훌륭해요! 상위 1% 달성!';
+            else badgeEl.textContent = '✨ 틀린 단어를 다시 복습해봐요!';
+        }
+
         document.getElementById('result-score-text').textContent = `${pct}점 (${score} / ${total})`;
         document.getElementById('result-summary-detail').textContent = `${total} 문제 중 ${score} 문제를 맞추셨습니다!`;
 
