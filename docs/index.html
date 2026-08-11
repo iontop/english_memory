@@ -121,12 +121,24 @@
             </div>
 
             <!-- Preset Word Sets Header -->
-            <div class="flex items-center justify-between pt-2">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
                 <h3 class="text-xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-graduation-cap text-purple-500"></i>
                     <span>대학입시 & 수능 필수 Vocab 셋업 목록 🌸</span>
                 </h3>
-                <span class="typo-muted text-xs font-bold hidden sm:inline">원하시는 Vocab 세트를 pick해서 스터디를 시작해보세요!</span>
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <span id="total-sets-badge" class="px-3 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-300 rounded-full text-xs font-bold">0 개</span>
+                    <div class="flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl px-3 py-1.5 shadow-sm text-xs">
+                        <i class="fa-solid fa-arrow-down-short-wide text-purple-500"></i>
+                        <select id="sets-sort-select" onchange="app.changeSetsSort(this.value)" class="bg-transparent text-slate-700 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer">
+                            <option value="created_desc" selected>최신 생성순 (기본)</option>
+                            <option value="created_asc">오래된 생성순</option>
+                            <option value="word_count_desc">단어 많은순</option>
+                            <option value="word_count_asc">단어 적은순</option>
+                            <option value="title_asc">단어장 이름순</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Word Sets Grid List -->

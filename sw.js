@@ -1,12 +1,12 @@
-// Service Worker for English Memory PWA (v0.5.0)
-const CACHE_NAME = 'english-memory-v0.5.0';
+// Service Worker for English Memory PWA (v0.6.0)
+const CACHE_NAME = 'english-memory-v0.6.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/styles.css?v=0.5.0',
-  './js/config.js?v=0.5.0',
-  './js/app.js?v=0.5.0',
-  './js/db.js?v=0.5.0',
+  './css/styles.css?v=0.6.0',
+  './js/config.js?v=0.6.0',
+  './js/app.js?v=0.6.0',
+  './js/db.js?v=0.6.0',
   './manifest.json',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'

@@ -114,7 +114,10 @@ const app = {
         quizCurrentIndex: 0,
         quizScore: 0,
         quizWrongWords: [],
-        quizUserAnswer: null
+        quizUserAnswer: null,
+
+        // Sets Sorting State
+        setsSortBy: 'created_desc'
     },
 
     init: function() {
@@ -420,14 +423,77 @@ const app = {
         }, 3000);
     },
 
-    // ------------------ WORD SETS MANAGEMENT ------------------
-    loadWordSets: async function() {
-        // 1. ALWAYS Render Client-Side Presets IMMEDIATELY (0ms delay for Mobile!)
-        if (this.state.wordSets.length === 0) {
-            this.state.wordSets = PRESET_WORD_SETS;
-            this.renderWordSetsGrid(PRESET_WORD_SETS);
-            this.populateSetDropdowns();
+    // ------------------ WORD SETS SORTING & MANAGEMENT ------------------
+    saveCustomWordSetsToStorage: function() {
+        try {
+            const presetIds = new Set(PRESET_WORD_SETS.map(s => s.id));
+            const customSets = (this.state.wordSets || []).filter(s => !presetIds.has(s.id));
+            localStorage.setItem("USER_CUSTOM_WORD_SETS", JSON.stringify(customSets));
+        } catch (e) {
+            console.warn("Failed to save custom word sets to localStorage:", e);
         }
+    },
+
+    getCustomWordSetsFromStorage: function() {
+        try {
+            const raw = localStorage.getItem("USER_CUSTOM_WORD_SETS");
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    },
+
+    sortWordSets: function(sets, sortBy) {
+        if (!sets || !Array.isArray(sets)) return [];
+        const sorted = [...sets];
+        const mode = sortBy || this.state.setsSortBy || 'created_desc';
+
+        sorted.sort((a, b) => {
+            const countA = a.word_count || (a.words ? a.words.length : 0);
+            const countB = b.word_count || (b.words ? b.words.length : 0);
+            const idA = parseInt(a.id) || 0;
+            const idB = parseInt(b.id) || 0;
+
+            if (mode === 'created_desc') {
+                return idB - idA;
+            } else if (mode === 'created_asc') {
+                return idA - idB;
+            } else if (mode === 'word_count_desc') {
+                if (countB !== countA) return countB - countA;
+                return idB - idA;
+            } else if (mode === 'word_count_asc') {
+                if (countA !== countB) return countA - countB;
+                return idB - idA;
+            } else if (mode === 'title_asc') {
+                return (a.title || '').localeCompare(b.title || '', 'ko');
+            }
+            return idB - idA;
+        });
+
+        return sorted;
+    },
+
+    changeSetsSort: function(sortOption) {
+        this.state.setsSortBy = sortOption;
+        this.renderWordSetsGrid(this.state.wordSets);
+        this.populateSetDropdowns();
+    },
+
+    loadWordSets: async function() {
+        const customSets = this.getCustomWordSetsFromStorage();
+        const presetIds = new Set(PRESET_WORD_SETS.map(s => s.id));
+
+        // 1. Initial render using PRESET_WORD_SETS + Local Custom Sets
+        const initialMerged = [...PRESET_WORD_SETS];
+        customSets.forEach(cs => {
+            if (!presetIds.has(cs.id)) {
+                initialMerged.push(cs);
+            }
+        });
+
+        this.state.wordSets = initialMerged;
+        this.renderWordSetsGrid(initialMerged);
+        this.populateSetDropdowns();
 
         // 2. Background async fetch from Render backend (if available)
         const controller = new AbortController();
@@ -437,23 +503,40 @@ const app = {
             const res = await fetch(`${API_BASE_URL}/sets`, { signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
-                const sets = await res.json();
-                if (sets && sets.length > 0) {
-                    this.state.wordSets = sets;
-                    this.renderWordSetsGrid(sets);
+                const backendSets = await res.json();
+                if (backendSets && backendSets.length > 0) {
+                    const existingMap = new Map((this.state.wordSets || []).map(s => [s.id, s]));
+                    const backendSetIds = new Set(backendSets.map(s => s.id));
+
+                    const finalSets = [...backendSets];
+                    customSets.forEach(cs => {
+                        if (!backendSetIds.has(cs.id)) {
+                            finalSets.push(cs);
+                        }
+                    });
+
+                    finalSets.forEach(s => {
+                        const existing = existingMap.get(s.id);
+                        if (existing && existing.words && !s.words) {
+                            s.words = existing.words;
+                        }
+                    });
+
+                    this.state.wordSets = finalSets;
+                    this.saveCustomWordSetsToStorage();
+                    this.renderWordSetsGrid(finalSets);
                     this.populateSetDropdowns();
                 }
             }
         } catch (err) {
             clearTimeout(timeoutId);
-            // Standalone offline preset fallback handles rendering smoothly
         }
     },
 
     renderWordSetsGrid: function(sets) {
         const grid = document.getElementById('sets-grid');
         const badge = document.getElementById('total-sets-badge');
-        if (badge) badge.textContent = `${sets.length} 개`;
+        if (badge) badge.textContent = `${sets ? sets.length : 0} 개`;
 
         if (!sets || sets.length === 0) {
             grid.innerHTML = `
@@ -468,7 +551,9 @@ const app = {
             return;
         }
 
-        grid.innerHTML = sets.map(set => `
+        const sortedSets = this.sortWordSets(sets, this.state.setsSortBy);
+
+        grid.innerHTML = sortedSets.map(set => `
             <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between hover:border-purple-500/50 transition-all duration-300 shadow-xl group">
                 <div class="space-y-3">
                     <div class="flex items-start justify-between gap-2">
@@ -502,11 +587,12 @@ const app = {
 
     populateSetDropdowns: function() {
         const dropdowns = ['manager-set-select'];
+        const sortedSets = this.sortWordSets(this.state.wordSets, this.state.setsSortBy);
         dropdowns.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
             const currentVal = el.value;
-            el.innerHTML = this.state.wordSets.map(set => `
+            el.innerHTML = sortedSets.map(set => `
                 <option value="${set.id}">${this.escapeHtml(set.title)} (${set.word_count || 30}단어)</option>
             `).join('');
 
@@ -637,6 +723,8 @@ const app = {
         const description = document.getElementById('modal-input-desc').value.trim();
         if (!title) return;
 
+        let createdSet = null;
+
         try {
             const res = await fetch(`${API_BASE_URL}/sets`, {
                 method: 'POST',
@@ -645,23 +733,30 @@ const app = {
             });
 
             if (!res.ok) throw new Error("생성 실패");
-            this.showToast("새 단어장이 성공적으로 생성되었습니다!", "success");
-            this.closeCreateSetModal();
-            this.loadWordSets();
+            createdSet = await res.json();
         } catch (err) {
             // Local offline addition fallback
             const newId = Date.now();
-            this.state.wordSets.push({ id: newId, title, description, word_count: 0, words: [] });
+            createdSet = { id: newId, title, description, word_count: 0, words: [] };
+        }
+
+        if (createdSet) {
+            const exists = this.state.wordSets.some(s => s.id === createdSet.id);
+            if (!exists) {
+                this.state.wordSets.push(createdSet);
+            }
+            this.saveCustomWordSetsToStorage();
             this.renderWordSetsGrid(this.state.wordSets);
             this.populateSetDropdowns();
             this.closeCreateSetModal();
-            this.showToast("새 단어장이 추가되었습니다!", "success");
+            this.showToast("새 단어장이 성공적으로 생성되었습니다!", "success");
         }
     },
 
     deleteSet: async function(setId, title) {
         if (!confirm(`정말로 단어장 '${title}'을(를) 삭제하시겠습니까?`)) return;
         this.state.wordSets = this.state.wordSets.filter(s => s.id !== setId);
+        this.saveCustomWordSetsToStorage();
         this.renderWordSetsGrid(this.state.wordSets);
         this.populateSetDropdowns();
         this.showToast("단어장이 삭제되었습니다.", "success");
@@ -715,6 +810,10 @@ const app = {
             if (res.ok) {
                 const data = await res.json();
                 if (data.words && data.words.length > 0) {
+                    if (targetSet) {
+                        targetSet.words = data.words;
+                        targetSet.word_count = data.words.length;
+                    }
                     document.getElementById('study-set-title').textContent = data.title;
                     document.getElementById('study-set-desc').textContent = data.description || "플래시카드를 클릭하여 한글 뜻을 확인하세요.";
                     this.state.currentStudyWords = data.words;
@@ -861,6 +960,10 @@ const app = {
             const res = await fetch(`${API_BASE_URL}/sets/${setId}/words`);
             if (res.ok) {
                 const data = await res.json();
+                if (targetSet) {
+                    targetSet.words = data.words || [];
+                    targetSet.word_count = data.words.length;
+                }
                 document.getElementById('manager-current-set-title').textContent = data.title;
                 document.getElementById('manager-words-count-badge').textContent = `${data.words.length}개`;
                 this.renderManagerWordsList(data.words, setId);
@@ -922,10 +1025,23 @@ const app = {
             if (!res.ok) throw new Error("자동 수집 및 등록 실패");
             const data = await res.json();
 
+            const targetSet = this.state.wordSets.find(s => s.id == setId);
+            if (targetSet) {
+                targetSet.words = targetSet.words || [];
+                const existingIdx = targetSet.words.findIndex(w => w.id === data.word.id || w.word.toLowerCase() === data.word.word.toLowerCase());
+                if (existingIdx >= 0) {
+                    targetSet.words[existingIdx] = data.word;
+                } else {
+                    targetSet.words.push(data.word);
+                }
+                targetSet.word_count = targetSet.words.length;
+            }
+
+            this.saveCustomWordSetsToStorage();
             this.showToast(`'${word}' 단어가 세트에 성공적으로 등록되었습니다! ✨`, "success");
             wordInput.value = '';
-            this.loadManagerSetWords(setId);
-            this.loadWordSets();
+            await this.loadManagerSetWords(setId);
+            await this.loadWordSets();
         } catch (err) {
             // Fallback for standalone offline addition
             const targetSet = this.state.wordSets.find(s => s.id == setId);
@@ -933,6 +1049,7 @@ const app = {
                 targetSet.words = targetSet.words || [];
                 targetSet.words.push({ id: Date.now(), word, meaning: `${word} (수집 단어)`, phonetic: "", audio_url: "" });
                 targetSet.word_count = targetSet.words.length;
+                this.saveCustomWordSetsToStorage();
                 this.renderManagerWordsList(targetSet.words, setId);
                 this.showToast(`'${word}' 단어가 추가되었습니다! ✨`, "success");
                 wordInput.value = '';
@@ -951,6 +1068,7 @@ const app = {
             targetSet.word_count = targetSet.words.length;
             this.renderManagerWordsList(targetSet.words, setId);
         }
+        this.saveCustomWordSetsToStorage();
         this.showToast("단어가 세트에서 제외되었습니다.", "success");
 
         try {
@@ -1039,7 +1157,19 @@ const app = {
             words = Array.from(map.values());
         } else {
             const targetSet = this.state.wordSets.find(s => s.id == setId) || PRESET_WORD_SETS.find(s => s.id == setId);
-            words = targetSet ? targetSet.words || [] : [];
+            if (targetSet) {
+                if (!targetSet.words || targetSet.words.length === 0) {
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/sets/${setId}/words`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            targetSet.words = data.words || [];
+                            targetSet.word_count = targetSet.words.length;
+                        }
+                    } catch (e) {}
+                }
+                words = targetSet.words || [];
+            }
         }
 
         if (words.length < 2) {

@@ -58,10 +58,10 @@ def init_db():
     
     conn.commit()
     
-    # Ensure all 10 sets have at least 30 words
-    cursor.execute("SELECT COUNT(*) FROM set_words")
-    set_words_count = cursor.fetchone()[0]
-    if set_words_count < 300:
+    # Ensure initial seed exam sets exist if database is completely empty
+    cursor.execute("SELECT COUNT(*) FROM word_sets")
+    word_sets_count = cursor.fetchone()[0]
+    if word_sets_count == 0:
         seed_10_exam_sets(conn)
         
     conn.close()
@@ -193,10 +193,16 @@ def fetch_naver_dictionary(word_query):
         "example_kr": ""
     }
 
+    def strip_html(text):
+        if not text:
+            return ""
+        if "<" in text:
+            return BeautifulSoup(text, "html.parser").get_text().strip()
+        return text.strip()
+
     api_urls = [
-        f"https://en.dict.naver.com/api/platform/pcode/search/all?query={urllib.parse.quote(cleaned_word)}",
-        f"https://dict.naver.com/api/v2/platform/enko/search/all?query={urllib.parse.quote(cleaned_word)}",
-        f"https://en.dict.naver.com/api/v2/platform/enko/search/all?query={urllib.parse.quote(cleaned_word)}"
+        f"https://en.dict.naver.com/api3/enko/search?query={urllib.parse.quote(cleaned_word)}",
+        f"https://dict.naver.com/api3/enko/search?query={urllib.parse.quote(cleaned_word)}"
     ]
 
     for api_url in api_urls:
@@ -205,8 +211,11 @@ def fetch_naver_dictionary(word_query):
             if res.status_code == 200:
                 try:
                     data = res.json()
-                    search_map = data.get("searchResultMap", {}).get("searchResultListMap", {}).get("WORD", {})
-                    items = search_map.get("items", [])
+                    search_list_map = data.get("searchResultMap", {}).get("searchResultListMap", {})
+                    
+                    # 1. WORD items parsing
+                    word_map = search_list_map.get("WORD", {})
+                    items = word_map.get("items", [])
                     if items:
                         first_item = items[0]
                         means_collector = first_item.get("meansCollector", [])
@@ -214,30 +223,50 @@ def fetch_naver_dictionary(word_query):
                         for mc in means_collector:
                             for m in mc.get("means", []):
                                 val = m.get("value") or m.get("mean")
-                                if val and val not in meanings:
-                                    meanings.append(val)
+                                if val:
+                                    clean_val = strip_html(val)
+                                    if clean_val and clean_val not in meanings:
+                                        meanings.append(clean_val)
                         if meanings:
                             result["meaning"] = ", ".join(meanings)
                             
                         symbol_list = first_item.get("searchPhoneticSymbolList", [])
-                        if symbol_list:
-                            result["phonetic"] = symbol_list[0].get("symbolValue") or symbol_list[0].get("symbol") or ""
-                        elif first_item.get("symbol"):
+                        for sym in symbol_list:
+                            if sym.get("symbolValue") and not result["phonetic"]:
+                                result["phonetic"] = sym.get("symbolValue")
+                            if sym.get("symbolFile") and not result["audio_url"]:
+                                result["audio_url"] = sym.get("symbolFile")
+
+                        if first_item.get("symbol") and not result["phonetic"]:
                             result["phonetic"] = first_item.get("symbol")
-
-                        if first_item.get("soundUrl"):
+                        if first_item.get("soundUrl") and not result["audio_url"]:
                             result["audio_url"] = first_item.get("soundUrl")
-                        elif symbol_list and symbol_list[0].get("soundUrl"):
-                            result["audio_url"] = symbol_list[0].get("soundUrl")
 
-                        examples = first_item.get("EXAMPLE", {}).get("items", []) or first_item.get("exampleList", [])
-                        if examples:
-                            first_ex = examples[0]
-                            result["example_en"] = BeautifulSoup(first_ex.get("exampleOri") or first_ex.get("example_en") or "", "html.parser").get_text()
-                            result["example_kr"] = BeautifulSoup(first_ex.get("exampleTrans") or first_ex.get("example_kr") or "", "html.parser").get_text()
+                        examples_in_word = first_item.get("EXAMPLE", {}).get("items", []) or first_item.get("exampleList", [])
+                        if examples_in_word:
+                            first_ex = examples_in_word[0]
+                            ex_en = first_ex.get("exampleOri") or first_ex.get("example_en") or ""
+                            ex_kr = first_ex.get("exampleTrans") or first_ex.get("example_kr") or ""
+                            if ex_en and not result["example_en"]:
+                                result["example_en"] = strip_html(ex_en)
+                            if ex_kr and not result["example_kr"]:
+                                result["example_kr"] = strip_html(ex_kr)
 
-                        if result["meaning"]:
-                            return result
+                    # 2. Top-level EXAMPLE items parsing if not found in WORD item
+                    if not result["example_en"]:
+                        ex_map = search_list_map.get("EXAMPLE", {})
+                        ex_items = ex_map.get("items", [])
+                        if ex_items:
+                            first_ex = ex_items[0]
+                            ex_en = first_ex.get("expExample1") or first_ex.get("exampleOri") or first_ex.get("example_en") or ""
+                            ex_kr = first_ex.get("expExample2") or first_ex.get("exampleTrans") or first_ex.get("example_kr") or ""
+                            if ex_en:
+                                result["example_en"] = strip_html(ex_en)
+                            if ex_kr:
+                                result["example_kr"] = strip_html(ex_kr)
+
+                    if result["meaning"]:
+                        return result
                 except Exception:
                     pass
         except Exception:
@@ -305,7 +334,7 @@ def get_word_sets():
         FROM word_sets ws
         LEFT JOIN set_words sw ON ws.id = sw.set_id
         GROUP BY ws.id
-        ORDER BY ws.id ASC;
+        ORDER BY ws.id DESC;
     """)
     rows = cursor.fetchall()
     conn.close()
@@ -404,6 +433,31 @@ def auto_add_word():
     if existing_word:
         word_id = existing_word["id"]
         word_data = dict(existing_word)
+        
+        is_fallback_meaning = not word_data["meaning"] or word_data["meaning"].endswith("(뜻 정보를 입력해주세요)")
+        is_missing_details = not word_data.get("phonetic") or not word_data.get("example_en")
+        
+        if is_fallback_meaning or is_missing_details or data.get("meaning"):
+            dict_data = fetch_naver_dictionary(word_text)
+            new_meaning = data.get("meaning") or dict_data.get("meaning") or word_data["meaning"]
+            new_phonetic = data.get("phonetic") or dict_data.get("phonetic") or word_data.get("phonetic", "")
+            new_audio_url = data.get("audio_url") or dict_data.get("audio_url") or word_data.get("audio_url", "")
+            new_example_en = data.get("example_en") or dict_data.get("example_en") or word_data.get("example_en", "")
+            new_example_kr = data.get("example_kr") or dict_data.get("example_kr") or word_data.get("example_kr", "")
+            
+            cursor.execute("""
+                UPDATE words
+                SET meaning = ?, phonetic = ?, audio_url = ?, example_en = ?, example_kr = ?
+                WHERE id = ?
+            """, (new_meaning, new_phonetic, new_audio_url, new_example_en, new_example_kr, word_id))
+            
+            word_data.update({
+                "meaning": new_meaning,
+                "phonetic": new_phonetic,
+                "audio_url": new_audio_url,
+                "example_en": new_example_en,
+                "example_kr": new_example_kr
+            })
     else:
         dict_data = fetch_naver_dictionary(word_text)
         
