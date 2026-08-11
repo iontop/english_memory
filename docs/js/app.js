@@ -483,10 +483,10 @@ const app = {
                 <div class="pt-6 space-y-3">
                     <div class="flex gap-2">
                         <button onclick="app.selectSetAndStudy(${set.id})" class="flex-1 py-2.5 rounded-2xl btn-primary text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-play"></i> 학습 시작
+                            <i class="fa-solid fa-play"></i> 🚀 스터디 시작
                         </button>
                         <button onclick="app.selectSetAndQuiz(${set.id})" class="flex-1 py-2.5 rounded-2xl glass-panel text-xs font-bold transition flex items-center justify-center gap-1.5 hover:bg-purple-500/10">
-                            <i class="fa-solid fa-gamepad text-pink-500"></i> 테스트
+                            <i class="fa-solid fa-gamepad text-pink-500"></i> 🎯 퀴즈 핏
                         </button>
                     </div>
                     <div class="flex items-center justify-between typo-muted pt-1">

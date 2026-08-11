@@ -34,20 +34,20 @@
             <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-1.5">
                 <button id="nav-sets" onclick="app.navigateTo('sets')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 btn-primary shadow-sm">
-                    <i class="fa-solid fa-book-bookmark mr-2"></i>단어장
+                    <i class="fa-solid fa-book-bookmark mr-2"></i>📚 셋업 단어장
                 </button>
                 <button id="nav-study" onclick="app.navigateTo('study')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
-                    <i class="fa-solid fa-layer-group mr-2 text-purple-500"></i>플래시카드
+                    <i class="fa-solid fa-layer-group mr-2 text-purple-500"></i>🌸 카드 스터디
                 </button>
                 <button id="nav-bookmarks" onclick="app.navigateTo('bookmarks')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted flex items-center gap-1.5">
-                    <i class="fa-solid fa-heart text-pink-500"></i>중요/미암기
+                    <i class="fa-solid fa-heart text-pink-500"></i>💖 인텐시브 복습
                     <span id="nav-bookmark-badge" class="text-[10px] px-1.5 py-0.2 rounded-full bg-pink-500 text-white font-extrabold hidden">0</span>
                 </button>
                 <button id="nav-manager" onclick="app.navigateTo('manager')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-2 text-purple-500"></i>단어 수집
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2 text-purple-500"></i>✨ 스마트 자동수집
                 </button>
                 <button id="nav-quiz" onclick="app.navigateTo('quiz')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
-                    <i class="fa-solid fa-gamepad mr-2 text-pink-500"></i>테스트 퀴즈
+                    <i class="fa-solid fa-gamepad mr-2 text-pink-500"></i>🎮 실력 퀴즈 핏
                 </button>
             </nav>
 
@@ -106,18 +106,27 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 p-8 sm:p-12 md:p-14 min-h-[250px] rounded-3xl shadow-xl relative overflow-hidden text-white">
                 <div class="space-y-3 z-10">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold shadow-sm">
-                        <span>✨ ver. 0.3 | 만든이: 북극곰</span>
+                        <span>✨ ver. 0.4 | 만들어진 핏: 북극곰 Dev</span>
                     </div>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white flex items-center gap-2 tracking-tight">
                         It's Leviosa, Not Leviosaaah! 💖
                     </h2>
                     <p class="text-purple-100 text-base font-medium leading-relaxed max-w-2xl">
-                        정확한 디테일이 곧 마법이다. 스펠링 하나까지 깔끔하게!
+                        정확한 디테일이 최고의 임팩트! 스펠링 하나까지 perfect하게 세팅해드릴게요~
                     </p>
                 </div>
                 <button onclick="app.openCreateSetModal()" class="z-10 inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-white text-purple-700 font-bold transition-all hover:bg-purple-50 active:scale-95 text-sm shrink-0 shadow-lg">
-                    <i class="fa-solid fa-plus-circle mr-2 text-pink-500"></i>나만의 단어장 추가
+                    <i class="fa-solid fa-plus-circle mr-2 text-pink-500"></i>+ 커스텀 단어장 추가하기
                 </button>
+            </div>
+
+            <!-- Preset Word Sets Header -->
+            <div class="flex items-center justify-between pt-2">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-purple-500"></i>
+                    <span>대학입시 & 수능 필수 Vocab 셋업 목록 🌸</span>
+                </h3>
+                <span class="typo-muted text-xs font-bold hidden sm:inline">원하시는 Vocab 세트를 pick해서 스터디를 시작해보세요!</span>
             </div>
 
             <!-- Word Sets Grid List -->
@@ -140,14 +149,14 @@
                     <div>
                         <h2 class="text-xl font-bold flex items-center gap-2">
                             <i class="fa-solid fa-layer-group text-purple-500"></i>
-                            <span id="study-set-title">플래시카드 학습 🌸</span>
+                            <span id="study-set-title">플래시카드 스터디 몰입 모드 🌸</span>
                         </h2>
-                        <p id="study-set-desc" class="typo-muted mt-1">플래시카드를 터치하면 뒤집어져서 뜻과 예문이 나타나요!</p>
+                        <p id="study-set-desc" class="typo-muted mt-1">카드를 탭하거나 쓱 스와이프하면 한글 뜻과 예문이 신나게 나타나요!</p>
                     </div>
                     
                     <div class="flex items-center gap-2">
                         <button onclick="app.shuffleStudyWords()" class="px-3.5 py-2.5 rounded-2xl glass-panel text-xs font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-shuffle text-purple-500"></i>순서 섞기
+                            <i class="fa-solid fa-shuffle text-purple-500"></i>🔀 순서 랜더마이즈
                         </button>
                     </div>
                 </div>
@@ -188,7 +197,7 @@
                             <button onclick="event.stopPropagation(); app.playCurrentWordAudio();" class="audio-btn w-16 h-16 rounded-full btn-primary flex items-center justify-center text-white text-2xl shadow-lg">
                                 <i class="fa-solid fa-volume-high"></i>
                             </button>
-                            <span class="typo-muted mt-6"><i class="fa-solid fa-hand-pointer mr-1 text-purple-500"></i>카드를 터치하면 뒤집혀요! 💖</span>
+                            <span class="typo-muted mt-6"><i class="fa-solid fa-hand-pointer mr-1 text-purple-500"></i>카드를 탭하거나 쓱 미지면 뒤집혀요! 💖</span>
                         </div>
 
                         <!-- BACK SIDE -->
@@ -204,7 +213,7 @@
                                     <i class="fa-solid fa-quote-left"></i> Example Sentence
                                 </p>
                                 <p id="card-ex-en" class="text-sm font-medium italic">"Sentence example here."</p>
-                                <p id="card-ex-kr" class="typo-muted">"해석 예문이 여기에 표시됩니다."</p>
+                                <p id="card-ex-kr" class="typo-muted">"해석 예문이 여기에 싱크업됩니다."</p>
                             </div>
                         </div>
                     </div>
@@ -214,10 +223,10 @@
             <!-- Quick Status Buttons (Complete / Need Review) -->
             <div class="max-w-xl mx-auto flex items-center justify-center gap-3">
                 <button onclick="app.markCurrentWordStatus(true)" class="flex-1 py-2.5 rounded-2xl glass-panel text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition flex items-center justify-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-circle-check"></i>암기 완료!
+                    <i class="fa-solid fa-circle-check"></i>💡 퍼펙트하게 암기 완료!
                 </button>
                 <button onclick="app.markCurrentWordStatus(false)" class="flex-1 py-2.5 rounded-2xl glass-panel text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition flex items-center justify-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-circle-question"></i>아직 헷갈려요 (미암기)
+                    <i class="fa-solid fa-circle-question"></i>❌ 아직 캐치 중 (미암기)
                 </button>
             </div>
 
@@ -249,17 +258,17 @@
                     <div>
                         <h2 class="text-xl font-bold flex items-center gap-2">
                             <i class="fa-solid fa-heart text-pink-500"></i>
-                            <span>나만의 복습 & 중요 단어장 💖</span>
+                            <span>나만의 인텐시브 복습 단어장 💖</span>
                         </h2>
-                        <p class="typo-muted mt-1">로그인 없이 내 기기에 저장된 중요/미암기 단어들을 집중 학습하세요.</p>
+                        <p class="typo-muted mt-1">내가 픽한 중요 단어와 헷갈렸던 단어만 쏙 모아서 효율적으로 디벨롭해보세요!</p>
                     </div>
 
                     <div class="flex gap-2">
                         <button onclick="app.startBookmarkStudy()" class="px-4 py-2.5 rounded-2xl btn-primary text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-play"></i>이 단어들만 학습
+                            <i class="fa-solid fa-play"></i>이 단어들만 몰입 스터디
                         </button>
                         <button onclick="app.startBookmarkQuiz()" class="px-4 py-2.5 rounded-2xl btn-secondary text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-gamepad"></i>이 단어들만 테스트
+                            <i class="fa-solid fa-gamepad"></i>이 단어들만 퀴즈 핏
                         </button>
                     </div>
                 </div>
@@ -267,7 +276,7 @@
                 <!-- Tabs: Bookmarked vs Unmemorized -->
                 <div class="flex border-b border-purple-500/20">
                     <button id="tab-btn-favorites" onclick="app.switchBookmarkTab('favorites')" class="py-2.5 px-4 font-bold text-sm border-b-2 border-pink-500 text-pink-500 transition">
-                        💖 중요 표시한 단어 (<span id="count-favorites">0</span>)
+                        💖 중요 스크랩 단어 (<span id="count-favorites">0</span>)
                     </button>
                     <button id="tab-btn-unmemorized" onclick="app.switchBookmarkTab('unmemorized')" class="py-2.5 px-4 font-bold text-sm border-b-2 border-transparent typo-muted transition">
                         ❌ 아직 헷갈리는 단어 (<span id="count-unmemorized">0</span>)
@@ -286,14 +295,14 @@
             <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
                 <h2 class="text-xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
-                    <span>영단어 네이버 사전 자동 수집 ✨</span>
+                    <span>영단어 네이버 사전 스마트 자동수집 ✨</span>
                 </h2>
-                <p class="typo-muted">네이버 사전 데이터베이스에서 단어 뜻, 발음기호, MP3 음성, 예문을 자동 수집합니다.</p>
+                <p class="typo-muted">단어만 쓱 입력하시면 네이버 사전 DB에서 뜻, 발음기호, MP3 음성, 예문까지 퍼펙트하게 파싱해드려요!</p>
 
                 <!-- Modern Interactive Card Grid Selection & Form -->
                 <div class="space-y-4 pt-2">
                     <div>
-                        <label class="block typo-caption mb-2">1. 수집/등록할 단어장 선택 (터치하여 선택)</label>
+                        <label class="block typo-caption mb-2">1. 수집해서 넣어둘 단어장 세트 선택 (터치하여 선택)</label>
                         <div id="manager-set-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[260px] overflow-y-auto pr-1">
                             <!-- Rendered dynamically via JS -->
                         </div>
@@ -308,7 +317,7 @@
                         <div class="flex items-end">
                             <button type="submit" id="btn-auto-add" class="w-full sm:w-auto py-3 px-6 rounded-2xl btn-primary text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shrink-0">
                                 <span id="spinner-auto-add" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
-                                <i class="fa-solid fa-sparkles"></i>자동 수집 & 추가
+                                <i class="fa-solid fa-sparkles"></i>✨ 자동수집 & 셋업
                             </button>
                         </div>
                     </form>
