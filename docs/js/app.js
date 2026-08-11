@@ -277,12 +277,12 @@ const app = {
             <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between hover:border-pink-500/50 transition-all duration-300 shadow-xl group">
                 <div class="space-y-3">
                     <div class="flex items-start justify-between gap-2">
-                        <h3 class="text-base font-bold text-white group-hover:text-pink-300 transition font-heading">${this.escapeHtml(set.title)}</h3>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-300 transition font-heading">${this.escapeHtml(set.title)}</h3>
                         <span class="text-xs px-2.5 py-1 rounded-full badge-pastel-pink font-bold shrink-0">
                             ${set.word_count || 30} 단어
                         </span>
                     </div>
-                    <p class="text-xs text-pink-200/70 line-clamp-2">${this.escapeHtml(set.description || "대학입시 수능 필수 단어 모음집")}</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 font-medium line-clamp-2">${this.escapeHtml(set.description || "대학입시 수능 필수 단어 모음집")}</p>
                 </div>
 
                 <div class="pt-6 space-y-3">
@@ -290,13 +290,13 @@ const app = {
                         <button onclick="app.selectSetAndStudy(${set.id})" class="flex-1 py-2.5 rounded-2xl btn-cute-pink text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-play"></i> 학습 시작
                         </button>
-                        <button onclick="app.selectSetAndQuiz(${set.id})" class="flex-1 py-2.5 rounded-2xl bg-purple-950/60 hover:bg-purple-900/80 text-pink-300 border border-purple-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <button onclick="app.selectSetAndQuiz(${set.id})" class="flex-1 py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/60 dark:hover:bg-purple-900/80 text-purple-700 dark:text-pink-300 border border-purple-200 dark:border-purple-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-gamepad"></i> 테스트
                         </button>
                     </div>
-                    <div class="flex items-center justify-between text-xs text-pink-300/60 pt-1">
+                    <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium pt-1">
                         <span><i class="fa-regular fa-clock mr-1"></i>입시 단어장</span>
-                        <button onclick="app.deleteSet(${set.id}, '${this.escapeHtml(set.title)}')" class="hover:text-rose-400 transition" title="단어장 삭제">
+                        <button onclick="app.deleteSet(${set.id}, '${this.escapeHtml(set.title)}')" class="hover:text-rose-500 transition" title="단어장 삭제">
                             <i class="fa-solid fa-trash-can"></i> 삭제
                         </button>
                     </div>

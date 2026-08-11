@@ -1,63 +1,65 @@
-/* 💖 Global Pastel & Strict Font Hierarchy Design System 💖 */
+/* 💖 Global Pastel & Maximum Readability Contrast Design System 💖 */
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pretendard:wght@300;400;500;600;700;800&display=swap');
 
 :root {
     --font-heading: 'Fredoka', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
     
-    /* Ethereal Light Pastel Theme Palette (Default) */
-    --bg-gradient: linear-gradient(135deg, #fff0f5 0%, #f3e8ff 45%, #e0f2fe 100%);
-    --panel-bg: rgba(255, 255, 255, 0.85);
+    /* Ethereal Light Theme - Maximum Readability & High Contrast (Default) */
+    --bg-gradient: linear-gradient(135deg, #fff5f8 0%, #f3e8ff 50%, #e0f2fe 100%);
+    --panel-bg: #ffffff;
     --panel-border: rgba(236, 72, 153, 0.25);
-    --panel-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.15), 0 4px 15px 0 rgba(168, 85, 247, 0.1);
+    --panel-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.05);
     
-    --nav-bg: rgba(255, 255, 255, 0.9);
+    --nav-bg: rgba(255, 255, 255, 0.95);
     --nav-border: rgba(236, 72, 153, 0.2);
     
-    --text-primary: #2e1065;
-    --text-secondary: #5b21b6;
-    --text-muted: #6b7280;
+    --text-primary: #0f172a;    /* Crisp Dark Slate (15:1 AAA Contrast) */
+    --text-secondary: #334155;  /* Deep Slate Gray */
+    --text-muted: #475569;      /* Dark Neutral Gray */
     
-    --card-front-bg: linear-gradient(145deg, #ffffff 0%, #fff5f8 100%);
-    --card-front-border: rgba(236, 72, 153, 0.4);
-    --card-back-bg: linear-gradient(145deg, #f5f3ff 0%, #ede9fe 100%);
-    --card-back-border: rgba(168, 85, 247, 0.4);
+    --card-front-bg: #ffffff;
+    --card-front-border: #ec4899;
+    --card-back-bg: #faf5ff;
+    --card-back-border: #a855f7;
     
-    --btn-pink: linear-gradient(135deg, #f472b6 0%, #c084fc 100%);
-    --btn-pink-shadow: 0 8px 20px -4px rgba(244, 114, 182, 0.4);
-    --btn-purple: linear-gradient(135deg, #818cf8 0%, #a855f7 100%);
-    --btn-purple-shadow: 0 8px 20px -4px rgba(129, 140, 248, 0.4);
+    --btn-pink: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
+    --btn-pink-shadow: 0 8px 20px -4px rgba(219, 39, 119, 0.35);
+    --btn-purple: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --btn-purple-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.35);
     
     --input-bg: #ffffff;
-    --input-border: rgba(236, 72, 153, 0.3);
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
 }
 
-/* Dark Mode Theme Palette Override */
+/* Dark Mode - Deep Pastel High Contrast Palette */
 html.dark {
-    --bg-gradient: radial-gradient(circle at 15% 15%, #2a1b4e 0%, #130f26 50%, #0d0a1a 100%);
-    --panel-bg: rgba(30, 24, 54, 0.8);
-    --panel-border: rgba(236, 72, 153, 0.25);
-    --panel-shadow: 0 12px 40px 0 rgba(168, 85, 247, 0.2);
+    --bg-gradient: radial-gradient(circle at 15% 15%, #231640 0%, #110d24 50%, #090714 100%);
+    --panel-bg: #1e1838;
+    --panel-border: rgba(236, 72, 153, 0.3);
+    --panel-shadow: 0 12px 40px 0 rgba(168, 85, 247, 0.25);
     
-    --nav-bg: rgba(19, 15, 38, 0.92);
-    --nav-border: rgba(236, 72, 153, 0.2);
+    --nav-bg: rgba(17, 13, 36, 0.94);
+    --nav-border: rgba(236, 72, 153, 0.25);
     
-    --text-primary: #ffffff;
-    --text-secondary: #f472b6;
-    --text-muted: #94a3b8;
+    --text-primary: #ffffff;    /* Pure White */
+    --text-secondary: #f1f5f9;  /* Light Slate */
+    --text-muted: #cbd5e1;      /* Bright Gray */
     
-    --card-front-bg: linear-gradient(145deg, #281c44 0%, #150f28 100%);
-    --card-front-border: rgba(236, 72, 153, 0.4);
-    --card-back-bg: linear-gradient(145deg, #431d4a 0%, #241033 100%);
-    --card-back-border: rgba(192, 132, 252, 0.4);
+    --card-front-bg: linear-gradient(145deg, #2b1d4c 0%, #17102e 100%);
+    --card-front-border: rgba(236, 72, 153, 0.5);
+    --card-back-bg: linear-gradient(145deg, #421c4b 0%, #261136 100%);
+    --card-back-border: rgba(192, 132, 252, 0.5);
     
     --btn-pink: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
     --btn-pink-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.5);
     --btn-purple: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
     --btn-purple-shadow: 0 10px 20px -5px rgba(129, 140, 248, 0.5);
     
-    --input-bg: #0f0c1b;
+    --input-bg: #120e26;
     --input-border: rgba(168, 85, 247, 0.4);
+    --input-text: #ffffff;
 }
 
 body {
@@ -66,7 +68,7 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background 0.4s ease, color 0.4s ease;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* ---------------- STRICT FONT HIERARCHY SYSTEM ---------------- */
@@ -76,6 +78,7 @@ h1, .typo-h1 {
     font-weight: 800;
     line-height: 1.25;
     letter-spacing: -0.025em;
+    color: var(--text-primary);
 }
 
 h2, .typo-h2 {
@@ -83,6 +86,7 @@ h2, .typo-h2 {
     font-size: 1.5rem; /* 24px */
     font-weight: 700;
     line-height: 1.35;
+    color: var(--text-primary);
 }
 
 h3, .typo-h3 {
@@ -90,18 +94,21 @@ h3, .typo-h3 {
     font-size: 1.125rem; /* 18px */
     font-weight: 600;
     line-height: 1.4;
+    color: var(--text-primary);
 }
 
 .typo-body {
     font-size: 0.875rem; /* 14px */
     font-weight: 400;
     line-height: 1.6;
+    color: var(--text-secondary);
 }
 
 .typo-caption {
     font-size: 0.75rem; /* 12px */
     font-weight: 600;
     letter-spacing: 0.05em;
+    color: var(--text-muted);
 }
 
 /* Glassmorphic Cards & Panels */
@@ -119,9 +126,17 @@ h3, .typo-h3 {
     border-bottom: 1px solid var(--nav-border);
 }
 
-/* Custom Pastel Buttons */
+/* Form Controls with High Contrast */
+input[type="text"], textarea, select {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--input-border) !important;
+}
+
+/* Custom Buttons */
 .btn-cute-pink {
     background: var(--btn-pink);
+    color: #ffffff !important;
     box-shadow: var(--btn-pink-shadow);
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -136,6 +151,7 @@ h3, .typo-h3 {
 
 .btn-cute-purple {
     background: var(--btn-purple);
+    color: #ffffff !important;
     box-shadow: var(--btn-purple-shadow);
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -205,9 +221,9 @@ h3, .typo-h3 {
 }
 
 .badge-pastel-pink {
-    background: rgba(244, 114, 182, 0.18);
+    background: rgba(236, 72, 153, 0.15);
     color: #db2777;
-    border: 1px solid rgba(244, 114, 182, 0.35);
+    border: 1px solid rgba(236, 72, 153, 0.3);
 }
 
 html.dark .badge-pastel-pink {

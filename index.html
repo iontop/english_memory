@@ -104,17 +104,19 @@
 
         <!-- ==================== VIEW 1: EXAM VOCABULARY DASHBOARD ==================== -->
         <section id="view-sets" class="space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-950/40 via-purple-950/50 to-indigo-950/40 p-6 sm:p-8 rounded-3xl border border-pink-500/30 shadow-2xl relative overflow-hidden">
-                <div class="space-y-1 z-10">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/20 border border-pink-500/30 text-pink-300 text-xs font-bold">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 dark:from-pink-950/80 dark:via-purple-950/80 dark:to-indigo-950/80 p-6 sm:p-8 rounded-3xl border border-pink-400/40 dark:border-pink-500/30 shadow-2xl relative overflow-hidden text-white">
+                <div class="space-y-2 z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 dark:bg-pink-500/20 border border-white/30 dark:border-pink-500/30 text-white dark:text-pink-300 text-xs font-bold shadow-sm">
                         <span>✨ ver. 0.1 | 만든이: 북극곰</span>
                     </div>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2 font-heading">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2 font-heading tracking-tight drop-shadow-sm">
                         It's Leviosa, Not Leviosaaah! 💖
                     </h2>
-                    <p class="text-slate-300 text-sm">정확한 디테일이 곧 마법이다. 스펠링 하나까지 깔끔하게!, Leviosa는 물체를 공중에 띄우는 마법, From &lt;해리포터와 마법사의 돌&gt;</p>
+                    <p class="text-pink-50 dark:text-slate-200 text-sm font-medium leading-relaxed max-w-2xl drop-shadow-sm">
+                        정확한 디테일이 곧 마법이다. 스펠링 하나까지 깔끔하게!, Leviosa는 물체를 공중에 띄우는 마법, From &lt;해리포터와 마법사의 돌&gt;
+                    </p>
                 </div>
-                <button onclick="app.openCreateSetModal()" class="z-10 inline-flex items-center justify-center px-5 py-3 rounded-2xl btn-cute-pink text-white font-bold transition-all active:scale-95 text-sm">
+                <button onclick="app.openCreateSetModal()" class="z-10 inline-flex items-center justify-center px-5 py-3 rounded-2xl btn-cute-pink text-white font-bold transition-all active:scale-95 text-sm shrink-0 shadow-lg">
                     <i class="fa-solid fa-plus-circle mr-2"></i>나만의 단어장 추가
                 </button>
             </div>
