@@ -188,15 +188,23 @@ const app = {
         ['sets', 'study', 'manager', 'quiz'].forEach(v => {
             const el = document.getElementById(`view-${v}`);
             const navBtn = document.getElementById(`nav-${v}`);
+            const mobileBtn = document.getElementById(`mobile-nav-${v}`);
+
             if (v === viewName) {
-                el.classList.remove('hidden');
+                if (el) el.classList.remove('hidden');
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 bg-pink-950/40 border border-pink-500/20 text-pink-400";
+                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 btn-primary shadow-sm";
+                }
+                if (mobileBtn) {
+                    mobileBtn.className = "flex flex-col items-center text-xs font-bold text-purple-600 dark:text-purple-400 py-1 px-3";
                 }
             } else {
-                el.classList.add('hidden');
+                if (el) el.classList.add('hidden');
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-slate-800 text-slate-300";
+                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted";
+                }
+                if (mobileBtn) {
+                    mobileBtn.className = "flex flex-col items-center text-xs font-bold typo-muted py-1 px-3";
                 }
             }
         });

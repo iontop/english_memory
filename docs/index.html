@@ -15,66 +15,66 @@
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
     <!-- Top Navigation Bar -->
-    <header class="sticky top-0 z-40 glass-nav shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('sets')">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
+    <header class="sticky top-0 z-40 glass-nav shadow-sm border-b border-purple-500/20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3 sm:gap-4 min-h-[64px]">
+            <!-- Brand Logo & Title -->
+            <div class="flex items-center space-x-3 cursor-pointer shrink-0" onclick="app.navigateTo('sets')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center shadow-md shrink-0">
                     <i class="fa-solid font-bold text-white text-xl fa-heart"></i>
                 </div>
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight flex items-center gap-2">
+                <div class="flex items-center gap-2">
+                    <h1 class="text-lg sm:text-xl font-extrabold tracking-tight font-heading">
                         English Memory
-                        <span class="text-xs px-2.5 py-0.5 rounded-full badge-soft font-bold">v0.1</span>
                     </h1>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.1</span>
                 </div>
             </div>
 
             <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center space-x-1">
-                <button id="nav-sets" onclick="app.navigateTo('sets')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 bg-purple-500 text-white shadow-sm">
-                    <i class="fa-solid fa-sparkles mr-2"></i>단어장
+            <nav class="hidden md:flex items-center space-x-1.5">
+                <button id="nav-sets" onclick="app.navigateTo('sets')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 btn-primary shadow-sm">
+                    <i class="fa-solid fa-book-bookmark mr-2"></i>단어장
                 </button>
-                <button id="nav-study" onclick="app.navigateTo('study')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10">
-                    <i class="fa-solid fa-cards-blank mr-2 text-purple-500"></i>플래시카드
+                <button id="nav-study" onclick="app.navigateTo('study')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
+                    <i class="fa-solid fa-layer-group mr-2 text-purple-500"></i>플래시카드
                 </button>
-                <button id="nav-manager" onclick="app.navigateTo('manager')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10">
+                <button id="nav-manager" onclick="app.navigateTo('manager')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
                     <i class="fa-solid fa-wand-magic-sparkles mr-2 text-purple-500"></i>단어 수집
                 </button>
-                <button id="nav-quiz" onclick="app.navigateTo('quiz')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10">
+                <button id="nav-quiz" onclick="app.navigateTo('quiz')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
                     <i class="fa-solid fa-gamepad mr-2 text-pink-500"></i>테스트 퀴즈
                 </button>
             </nav>
 
-            <!-- Right Side Controls: Theme Switcher & Backend Status -->
-            <div class="flex items-center space-x-2">
+            <!-- Right Side Controls: Theme Switcher & Backend Status (Spacious Layout) -->
+            <div class="flex items-center space-x-2 sm:space-x-3 shrink-0 ml-auto">
                 <!-- Light / Dark Theme Toggle Button -->
-                <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="px-3.5 py-1.5 rounded-full badge-soft text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="다크 / 라이트 모드 테마 변경">
+                <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="px-3 sm:px-3.5 py-1.5 rounded-full badge-soft text-xs font-bold transition flex items-center gap-1.5 shadow-sm hover:opacity-90 active:scale-95" title="다크 / 라이트 모드 테마 변경">
                     <span id="theme-toggle-icon">🌙</span>
-                    <span id="theme-toggle-text" class="hidden sm:inline">다크 모드</span>
+                    <span id="theme-toggle-text" class="inline">다크 모드</span>
                 </button>
 
                 <!-- Backend Server Status Indicator -->
-                <div onclick="app.promptCustomServerUrl()" class="flex items-center space-x-2 glass-panel px-3.5 py-1.5 rounded-full text-xs cursor-pointer transition shadow-sm" title="클릭하여 Render 백엔드 서버 URL 변경">
+                <div onclick="app.promptCustomServerUrl()" class="flex items-center space-x-2 glass-panel px-3 sm:px-3.5 py-1.5 rounded-full text-xs cursor-pointer transition shadow-sm hover:border-purple-500/40" title="클릭하여 Render 백엔드 서버 URL 변경">
                     <span id="server-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="server-status-text" class="font-semibold">연결됨</span>
+                    <span id="server-status-text" class="font-semibold text-xs">연결됨</span>
                     <i class="fa-solid fa-gear opacity-60 text-[10px]"></i>
                 </div>
             </div>
         </div>
 
         <!-- Mobile Navigation Bottom Bar -->
-        <div class="md:hidden flex justify-around glass-nav border-t py-2.5">
-            <button onclick="app.navigateTo('sets')" class="flex flex-col items-center text-xs font-bold text-purple-500 py-1 px-3">
-                <i class="fa-solid fa-sparkles text-lg mb-0.5"></i>단어장
+        <div class="md:hidden flex justify-around glass-nav border-t border-purple-500/20 py-2.5">
+            <button id="mobile-nav-sets" onclick="app.navigateTo('sets')" class="flex flex-col items-center text-xs font-bold text-purple-600 dark:text-purple-400 py-1 px-3">
+                <i class="fa-solid fa-book-bookmark text-lg mb-0.5"></i>단어장
             </button>
-            <button onclick="app.navigateTo('study')" class="flex flex-col items-center text-xs font-bold py-1 px-3 opacity-80">
-                <i class="fa-solid fa-clone text-lg mb-0.5"></i>학습
+            <button id="mobile-nav-study" onclick="app.navigateTo('study')" class="flex flex-col items-center text-xs font-bold typo-muted py-1 px-3">
+                <i class="fa-solid fa-layer-group text-lg mb-0.5"></i>학습
             </button>
-            <button onclick="app.navigateTo('manager')" class="flex flex-col items-center text-xs font-bold py-1 px-3 opacity-80">
+            <button id="mobile-nav-manager" onclick="app.navigateTo('manager')" class="flex flex-col items-center text-xs font-bold typo-muted py-1 px-3">
                 <i class="fa-solid fa-wand-magic-sparkles text-lg mb-0.5"></i>수집
             </button>
-            <button onclick="app.navigateTo('quiz')" class="flex flex-col items-center text-xs font-bold py-1 px-3 opacity-80">
+            <button id="mobile-nav-quiz" onclick="app.navigateTo('quiz')" class="flex flex-col items-center text-xs font-bold typo-muted py-1 px-3">
                 <i class="fa-solid fa-gamepad text-lg mb-0.5"></i>테스트
             </button>
         </div>
