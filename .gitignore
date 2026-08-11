@@ -1,0 +1,12 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local SQLite Database
+*.db
+
+# macOS System Files
+.DS_Store
+.idea/
+.vscode/
