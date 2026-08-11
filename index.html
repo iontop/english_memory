@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="English Memory v0.5 - PWA 지원 파스텔 영단어 암기 & 타임어택 퀴즈 웹플랫폼">
+    <meta name="description" content="English Memory v0.6.0 - PWA 지원 파스텔 영단어 암기 & 타임어택 퀴즈 웹플랫폼">
     <title>English Memory</title>
     <link rel="manifest" href="manifest.json">
     <!-- Tailwind CSS CDN -->
@@ -11,7 +11,7 @@
     <!-- Font Awesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Pretendard & Inter Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css?v=0.5.0">
+    <link rel="stylesheet" href="css/styles.css?v=0.6.0">
 </head>
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
@@ -27,27 +27,27 @@
                     <h1 class="text-lg sm:text-xl font-extrabold tracking-tight font-heading">
                         English Memory
                     </h1>
-                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.5</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.6.0</span>
                 </div>
             </div>
 
             <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center space-x-1.5">
                 <button id="nav-sets" onclick="app.navigateTo('sets')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 btn-primary shadow-sm">
-                    <i class="fa-solid fa-book-bookmark mr-2"></i>📚 셋업 단어장
+                    <i class="fa-solid fa-book-bookmark mr-2"></i>셋업 단어장
                 </button>
                 <button id="nav-study" onclick="app.navigateTo('study')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
-                    <i class="fa-solid fa-layer-group mr-2 text-purple-500"></i>🌸 카드 스터디
+                    <i class="fa-solid fa-layer-group mr-2 text-purple-500"></i>카드 스터디
                 </button>
                 <button id="nav-bookmarks" onclick="app.navigateTo('bookmarks')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted flex items-center gap-1.5">
-                    <i class="fa-solid fa-heart text-pink-500"></i>💖 인텐시브 복습
+                    <i class="fa-solid fa-heart text-pink-500 mr-1"></i>인텐시브 복습
                     <span id="nav-bookmark-badge" class="text-[10px] px-1.5 py-0.2 rounded-full bg-pink-500 text-white font-extrabold hidden">0</span>
                 </button>
                 <button id="nav-manager" onclick="app.navigateTo('manager')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
-                    <i class="fa-solid fa-wand-magic-sparkles mr-2 text-purple-500"></i>✨ 스마트 자동수집
+                    <i class="fa-solid fa-wand-magic-sparkles mr-2 text-purple-500"></i>스마트 자동수집
                 </button>
                 <button id="nav-quiz" onclick="app.navigateTo('quiz')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted">
-                    <i class="fa-solid fa-gamepad mr-2 text-pink-500"></i>🎮 실력 퀴즈 핏
+                    <i class="fa-solid fa-gamepad mr-2 text-pink-500"></i>실력 퀴즈 핏
                 </button>
             </nav>
 
@@ -83,7 +83,7 @@
                 <i class="fa-solid fa-layer-group text-lg mb-0.5"></i>학습
             </button>
             <button id="mobile-nav-bookmarks" onclick="app.navigateTo('bookmarks')" class="flex flex-col items-center text-xs font-bold typo-muted py-1 px-2 relative">
-                <i class="fa-solid fa-heart text-lg mb-0.5 text-pink-500"></i>중요/복습
+                <i class="fa-solid fa-heart text-lg mb-0.5 text-pink-500"></i>복습
                 <span id="mobile-bookmark-badge" class="absolute top-0.5 right-1 w-2 h-2 rounded-full bg-pink-500 hidden"></span>
             </button>
             <button id="mobile-nav-manager" onclick="app.navigateTo('manager')" class="flex flex-col items-center text-xs font-bold typo-muted py-1 px-2">
@@ -106,10 +106,10 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 p-8 sm:p-12 md:p-14 min-h-[250px] rounded-3xl shadow-xl relative overflow-hidden text-white">
                 <div class="space-y-3 z-10">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold shadow-sm">
-                        <span>✨ ver. 0.5 | 만들어진 핏: 북극곰 Dev</span>
+                        <span>✨ ver. 0.6.0 | 만들어진 핏: 북극곰 Dev</span>
                     </div>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white flex items-center gap-2 tracking-tight">
-                        It's Leviosa, Not Leviosaaah! 💖
+                        It's Leviosa, Not Leviosaaah!
                     </h2>
                     <p class="text-purple-100 text-base font-medium leading-relaxed max-w-2xl">
                         정확한 디테일이 최고의 임팩트! 스펠링 하나까지 perfect하게 세팅해드릴게요~
@@ -124,13 +124,13 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
                 <h3 class="text-xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-graduation-cap text-purple-500"></i>
-                    <span>대학입시 & 수능 필수 Vocab 셋업 목록 🌸</span>
+                    <span>대학입시 & 수능 필수 Vocab 셋업 목록</span>
                 </h3>
                 <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <span id="total-sets-badge" class="px-3 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-300 rounded-full text-xs font-bold">0 개</span>
-                    <div class="flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-2xl px-3 py-1.5 shadow-sm text-xs">
+                    <div class="flex items-center gap-2 glass-panel border border-purple-500/30 rounded-2xl px-3 py-1.5 shadow-sm text-xs">
                         <i class="fa-solid fa-arrow-down-short-wide text-purple-500"></i>
-                        <select id="sets-sort-select" onchange="app.changeSetsSort(this.value)" class="bg-transparent text-slate-700 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer">
+                        <select id="sets-sort-select" onchange="app.changeSetsSort(this.value)" class="bg-transparent text-purple-600 dark:text-purple-400 font-semibold focus:outline-none cursor-pointer">
                             <option value="created_desc" selected>최신 생성순 (기본)</option>
                             <option value="created_asc">오래된 생성순</option>
                             <option value="word_count_desc">단어 많은순</option>
@@ -161,7 +161,7 @@
                     <div>
                         <h2 class="text-xl font-bold flex items-center gap-2">
                             <i class="fa-solid fa-layer-group text-purple-500"></i>
-                            <span id="study-set-title">플래시카드 스터디 몰입 모드 🌸</span>
+                            <span id="study-set-title">플래시카드 스터디 몰입 모드</span>
                         </h2>
                         <p id="study-set-desc" class="typo-muted mt-1">카드를 탭하거나 쓱 스와이프하면 한글 뜻과 예문이 신나게 나타나요!</p>
                     </div>
@@ -209,7 +209,7 @@
                             <button onclick="event.stopPropagation(); app.playCurrentWordAudio();" class="audio-btn w-16 h-16 rounded-full btn-primary flex items-center justify-center text-white text-2xl shadow-lg">
                                 <i class="fa-solid fa-volume-high"></i>
                             </button>
-                            <span class="typo-muted mt-6"><i class="fa-solid fa-hand-pointer mr-1 text-purple-500"></i>카드를 탭하거나 쓱 밀면 뒤집혀요! 💖</span>
+                            <span class="typo-muted mt-6"><i class="fa-solid fa-hand-pointer mr-1 text-purple-500"></i>카드를 탭하거나 쓱 밀면 뒤집혀요!</span>
                         </div>
 
                         <!-- BACK SIDE -->
@@ -270,7 +270,7 @@
                     <div>
                         <h2 class="text-xl font-bold flex items-center gap-2">
                             <i class="fa-solid fa-heart text-pink-500"></i>
-                            <span>나만의 인텐시브 복습 단어장 💖</span>
+                            <span>나만의 인텐시브 복습 단어장</span>
                         </h2>
                         <p class="typo-muted mt-1">내가 픽한 중요 단어와 헷갈렸던 단어만 쏙 모아서 효율적으로 디벨롭해보세요!</p>
                     </div>
@@ -307,7 +307,7 @@
             <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
                 <h2 class="text-xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
-                    <span>영단어 네이버 사전 스마트 자동수집 ✨</span>
+                    <span>영단어 네이버 사전 스마트 자동수집</span>
                 </h2>
                 <p class="typo-muted">단어만 쓱 입력하시면 네이버 사전 DB에서 뜻, 발음기호, MP3 음성, 예문까지 퍼펙트하게 파싱해드려요!</p>
 
@@ -320,17 +320,37 @@
                         </div>
                     </div>
 
-                    <form onsubmit="app.handleAutoAddWord(event)" class="flex flex-col sm:flex-row gap-3 pt-2">
-                        <div class="flex-grow">
-                            <label class="block typo-caption mb-1">2. 수집할 영단어 (English Word)</label>
-                            <input type="text" id="input-word-text" placeholder="예: resilient, ephemeral, meticulous" required autocomplete="off" class="w-full text-sm rounded-2xl px-4 py-3 focus:outline-none">
+                    <form onsubmit="app.handleAutoAddWord(event)" class="flex flex-col gap-3 pt-2">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex-grow">
+                                <label class="block typo-caption mb-1">2. 수집할 영단어 (English Word)</label>
+                                <input type="text" id="input-word-text" placeholder="예: resilient, ephemeral, meticulous" required autocomplete="off"
+                                    oninput="app.debounceWordPreview(this.value)"
+                                    class="w-full text-sm rounded-2xl px-4 py-3 focus:outline-none">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" id="btn-auto-add" class="w-full sm:w-auto py-3 px-6 rounded-2xl btn-primary text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shrink-0">
+                                    <span id="spinner-auto-add" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
+                                    <i class="fa-solid fa-sparkles"></i>자동수집 & 셋업
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="flex items-end">
-                            <button type="submit" id="btn-auto-add" class="w-full sm:w-auto py-3 px-6 rounded-2xl btn-primary text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shrink-0">
-                                <span id="spinner-auto-add" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
-                                <i class="fa-solid fa-sparkles"></i>✨ 자동수집 & 셋업
-                            </button>
+                        <!-- Word Preview Panel (shown on input) -->
+                        <div id="word-preview-panel" class="hidden glass-panel border border-purple-500/30 rounded-2xl p-4 space-y-2 transition-all">
+                            <div class="flex items-center gap-2">
+                                <span id="preview-loading" class="hidden"><i class="fa-solid fa-spinner animate-spin text-purple-500 text-xs"></i></span>
+                                <span class="text-xs font-bold text-purple-500 uppercase tracking-wide">단어 미리보기</span>
+                            </div>
+                            <div class="flex items-baseline gap-3 flex-wrap">
+                                <span id="preview-word" class="text-xl font-extrabold tracking-wide"></span>
+                                <span id="preview-phonetic" class="text-sm phonetic-text"></span>
+                                <button id="preview-audio-btn" onclick="app.playAudioUrl(app._previewAudioUrl, document.getElementById('preview-word').textContent)" class="hidden text-purple-500 hover:text-purple-400 transition" title="발음 듣기">
+                                    <i class="fa-solid fa-volume-low"></i>
+                                </button>
+                            </div>
+                            <p id="preview-meaning" class="text-sm font-bold text-pink-500 dark:text-pink-400"></p>
+                            <p id="preview-example" class="typo-muted italic text-xs"></p>
                         </div>
                     </form>
                 </div>
@@ -361,7 +381,7 @@
                     <div class="w-14 h-14 rounded-3xl btn-primary mx-auto flex items-center justify-center text-2xl shadow-lg">
                         <i class="fa-solid fa-gamepad text-white"></i>
                     </div>
-                    <h2 class="text-2xl font-bold">얼마나 외웠나 볼까? 💖</h2>
+                    <h2 class="text-2xl font-bold">얼마나 외웠나 볼까?</h2>
                     <p class="typo-muted">단어장을 선택하고 맞춤형 퀴즈로 실력을 테스트해보세요!</p>
                 </div>
 
@@ -424,7 +444,7 @@
                 </div>
 
                 <div class="text-center py-4 space-y-3">
-                    <span class="typo-caption">다음 문제의 정답을 맞추세요 ✨</span>
+                    <span class="typo-caption">다음 문제의 정답을 맞추세요</span>
                     <h3 id="quiz-prompt-text" class="text-3xl font-extrabold tracking-wide">apple</h3>
                     <button id="quiz-audio-btn" onclick="app.playQuizAudio()" class="hidden mx-auto w-14 h-14 rounded-full btn-primary text-white text-xl shadow-lg flex items-center justify-center transition">
                         <i class="fa-solid fa-volume-high"></i>
@@ -436,7 +456,7 @@
                 </div>
 
                 <button id="quiz-submit-btn" onclick="app.submitQuizAnswer()" class="w-full py-3.5 rounded-2xl btn-secondary text-white font-extrabold shadow-md transition text-sm">
-                    정답 제출하기 💖
+                    정답 제출하기
                 </button>
             </div>
 
@@ -500,6 +520,49 @@
         </div>
     </div>
 
+    <!-- Word List Viewer Modal -->
+    <div id="modal-word-list" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4 py-6" onclick="app.closeWordListModal(event)">
+        <div class="glass-panel rounded-3xl max-w-2xl w-full shadow-2xl flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div class="flex justify-between items-center border-b border-purple-500/20 p-6 pb-4 shrink-0">
+                <div>
+                    <h3 id="modal-word-list-title" class="text-lg font-bold"></h3>
+                    <p id="modal-word-list-count" class="text-xs text-purple-500 font-bold mt-0.5"></p>
+                </div>
+                <button onclick="app.closeWordListModal()" class="opacity-60 hover:opacity-100 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- Search -->
+            <div class="px-6 py-3 shrink-0 border-b border-purple-500/10">
+                <div class="flex items-center gap-2 glass-panel border border-purple-500/20 rounded-xl px-3 py-2">
+                    <i class="fa-solid fa-magnifying-glass text-purple-400 text-xs"></i>
+                    <input type="text" id="word-list-search" placeholder="단어 검색..." oninput="app.filterWordListModal(this.value)"
+                        class="bg-transparent flex-1 text-sm focus:outline-none placeholder:text-slate-400">
+                </div>
+            </div>
+
+            <!-- Table Header -->
+            <div class="grid grid-cols-12 px-6 py-2 shrink-0 text-[11px] font-bold uppercase tracking-wider text-purple-500/70 border-b border-purple-500/10">
+                <div class="col-span-3">영단어</div>
+                <div class="col-span-3">발음기호</div>
+                <div class="col-span-6">뜻</div>
+            </div>
+
+            <!-- Word Rows -->
+            <div id="modal-word-list-body" class="overflow-y-auto flex-1 divide-y divide-purple-500/10 px-6">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 pt-4 shrink-0 border-t border-purple-500/10 flex gap-3">
+                <button onclick="app.closeWordListModal()" class="flex-1 py-2.5 rounded-2xl glass-panel text-xs font-bold transition">닫기</button>
+                <button id="modal-word-list-study-btn" class="flex-1 py-2.5 rounded-2xl btn-primary text-white text-xs font-bold shadow-md transition">
+                    <i class="fa-solid fa-play mr-1"></i>이 단어장 스터디
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Achievements & Polar Bear Badges Modal -->
     <div id="modal-achievements" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4">
         <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
@@ -525,8 +588,8 @@
     <audio id="app-audio-player" playsinline preload="auto" class="hidden"></audio>
 
     <!-- JS Scripts -->
-    <script src="js/config.js?v=0.5.0"></script>
-    <script src="js/db.js?v=0.5.0"></script>
-    <script src="js/app.js?v=0.5.0"></script>
+    <script src="js/config.js?v=0.6.0"></script>
+    <script src="js/db.js?v=0.6.0"></script>
+    <script src="js/app.js?v=0.6.0"></script>
 </body>
 </html>

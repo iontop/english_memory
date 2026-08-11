@@ -121,7 +121,7 @@ const app = {
     },
 
     init: function() {
-        console.log("Initializing English Memory App v0.5.0 with API:", API_BASE_URL);
+        console.log("Initializing English Memory App v0.6.0 with API:", API_BASE_URL);
         this.initTheme();
         this.initMobileAudioUnlock();
         this.initBookmarks();
@@ -135,7 +135,7 @@ const app = {
 
     registerServiceWorker: function() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=0.5.0').catch(() => {});
+            navigator.serviceWorker.register('./sw.js?v=0.6.0').catch(() => {});
         }
         if (window.IndexedDBEngine) {
             window.IndexedDBEngine.init();
@@ -553,36 +553,46 @@ const app = {
 
         const sortedSets = this.sortWordSets(sets, this.state.setsSortBy);
 
-        grid.innerHTML = sortedSets.map(set => `
+        grid.innerHTML = sortedSets.map(set => {
+            const wordCount = set.word_count !== undefined ? set.word_count : (set.words ? set.words.length : 0);
+            return `
             <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between hover:border-purple-500/50 transition-all duration-300 shadow-xl group">
                 <div class="space-y-3">
                     <div class="flex items-start justify-between gap-2">
-                        <h3 class="text-base font-bold transition font-heading" style="color: var(--text-main);">${this.escapeHtml(set.title)}</h3>
-                        <span class="text-xs px-2.5 py-1 rounded-full badge-soft font-bold shrink-0">
-                            ${set.word_count || 30} 단어
+                        <h3 class="text-base font-bold transition font-heading cursor-pointer hover:text-purple-500"
+                            onclick="app.openWordListModal(${set.id})"
+                            title="클릭하면 전체 단어 목록을 볼 수 있어요"
+                            style="color: var(--text-main);">
+                            ${this.escapeHtml(set.title)}
+                        </h3>
+                        <span class="text-xs px-2.5 py-1 rounded-full badge-soft font-bold shrink-0 cursor-pointer hover:bg-purple-500/20"
+                              onclick="app.openWordListModal(${set.id})" title="단어 목록 보기">
+                            ${wordCount} 단어
                         </span>
                     </div>
-                    <p class="typo-muted line-clamp-2">${this.escapeHtml(set.description || "대학입시 수능 필수 단어 모음집")}</p>
+                    <p class="typo-muted line-clamp-2">${this.escapeHtml(set.description || '대학입시 수능 필수 단어 모음집')}</p>
                 </div>
 
                 <div class="pt-6 space-y-3">
                     <div class="flex gap-2">
                         <button onclick="app.selectSetAndStudy(${set.id})" class="flex-1 py-2.5 rounded-2xl btn-primary text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-play"></i> 🚀 스터디 시작
+                            <i class="fa-solid fa-play"></i> 스터디 시작
                         </button>
                         <button onclick="app.selectSetAndQuiz(${set.id})" class="flex-1 py-2.5 rounded-2xl glass-panel text-xs font-bold transition flex items-center justify-center gap-1.5 hover:bg-purple-500/10">
-                            <i class="fa-solid fa-gamepad text-pink-500"></i> 🎯 퀴즈 핏
+                            <i class="fa-solid fa-gamepad text-pink-500"></i> 퀴즈 핏
                         </button>
                     </div>
                     <div class="flex items-center justify-between typo-muted pt-1">
-                        <span><i class="fa-regular fa-clock mr-1"></i>단어장</span>
+                        <button onclick="app.openWordListModal(${set.id})" class="flex items-center gap-1 hover:text-purple-500 transition text-xs">
+                            <i class="fa-solid fa-list-ul"></i> 전체 단어 목록
+                        </button>
                         <button onclick="app.deleteSet(${set.id}, '${this.escapeHtml(set.title)}')" class="hover:text-rose-500 transition" title="단어장 삭제">
                             <i class="fa-solid fa-trash-can"></i> 삭제
                         </button>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     },
 
     populateSetDropdowns: function() {
@@ -1075,6 +1085,152 @@ const app = {
             await fetch(`${API_BASE_URL}/sets/${setId}/words/${wordId}`, { method: 'DELETE' });
         } catch (err) {
             // Ignore backend offline notice
+        }
+    },
+
+    // ------------------ WORD LIST VIEWER MODAL ------------------
+    _wordListModalSetId: null,
+    _wordListAllWords: [],
+
+    openWordListModal: async function(setId) {
+        const modal = document.getElementById('modal-word-list');
+        const titleEl = document.getElementById('modal-word-list-title');
+        const countEl = document.getElementById('modal-word-list-count');
+        const bodyEl = document.getElementById('modal-word-list-body');
+        const studyBtn = document.getElementById('modal-word-list-study-btn');
+        const searchEl = document.getElementById('word-list-search');
+        if (!modal) return;
+
+        this._wordListModalSetId = setId;
+
+        // Show modal immediately with loading state
+        modal.classList.remove('hidden');
+        if (searchEl) searchEl.value = '';
+        bodyEl.innerHTML = `<div class="py-12 text-center"><i class="fa-solid fa-spinner animate-spin text-purple-500 text-2xl"></i></div>`;
+
+        // Find set in local state first
+        const localSet = this.state.wordSets.find(s => s.id == setId) || PRESET_WORD_SETS.find(s => s.id == setId);
+        if (localSet) {
+            if (titleEl) titleEl.textContent = localSet.title;
+            if (studyBtn) studyBtn.onclick = () => { this.closeWordListModal(); this.selectSetAndStudy(setId); };
+        }
+
+        // Fetch words from backend or use local
+        let words = [];
+        try {
+            const res = await fetch(`${API_BASE_URL}/sets/${setId}/words`);
+            if (res.ok) {
+                const data = await res.json();
+                words = data.words || [];
+                if (titleEl) titleEl.textContent = data.title;
+                // Update local cache
+                if (localSet) { localSet.words = words; localSet.word_count = words.length; }
+            } else {
+                throw new Error('backend unavailable');
+            }
+        } catch (e) {
+            // Fallback to local preset words
+            words = (localSet && localSet.words) ? localSet.words : [];
+        }
+
+        this._wordListAllWords = words;
+        if (countEl) countEl.textContent = `총 ${words.length}개 단어`;
+        this._renderWordListRows(words);
+        // Update card word count on grid
+        this.renderWordSetsGrid(this.state.wordSets);
+    },
+
+    _renderWordListRows: function(words) {
+        const bodyEl = document.getElementById('modal-word-list-body');
+        if (!bodyEl) return;
+        if (!words || words.length === 0) {
+            bodyEl.innerHTML = `<p class="text-center typo-muted py-12">등록된 단어가 없습니다.</p>`;
+            return;
+        }
+        bodyEl.innerHTML = words.map((w, i) => `
+            <div class="grid grid-cols-12 py-3 items-start gap-2 hover:bg-purple-500/5 rounded-lg transition -mx-1 px-1">
+                <div class="col-span-3">
+                    <span class="font-bold text-sm">${this.escapeHtml(w.word)}</span>
+                    ${w.audio_url ? `<button onclick="app.playAudioUrl('${w.audio_url}', '${w.word}')" class="ml-1 text-purple-400 hover:text-purple-600 transition"><i class="fa-solid fa-volume-low text-xs"></i></button>` : ''}
+                </div>
+                <div class="col-span-3 phonetic-text text-sm">${this.escapeHtml(w.phonetic || '-')}</div>
+                <div class="col-span-6">
+                    <p class="text-sm font-bold text-pink-500 dark:text-pink-400">${this.escapeHtml(w.meaning || '')}</p>
+                    ${w.example_en ? `<p class="typo-muted text-xs italic mt-0.5">${this.escapeHtml(w.example_en)}</p>` : ''}
+                </div>
+            </div>
+        `).join('');
+    },
+
+    filterWordListModal: function(query) {
+        const filtered = !query.trim()
+            ? this._wordListAllWords
+            : this._wordListAllWords.filter(w =>
+                w.word.toLowerCase().includes(query.toLowerCase()) ||
+                (w.meaning || '').includes(query) ||
+                (w.phonetic || '').includes(query)
+              );
+        const countEl = document.getElementById('modal-word-list-count');
+        if (countEl) countEl.textContent = `총 ${filtered.length}개 단어${query ? ` ("${query}" 검색 결과)` : ''}`;
+        this._renderWordListRows(filtered);
+    },
+
+    closeWordListModal: function(e) {
+        if (e && e.target !== document.getElementById('modal-word-list')) return;
+        const modal = document.getElementById('modal-word-list');
+        if (modal) modal.classList.add('hidden');
+    },
+
+    // ------------------ WORD PREVIEW (DEBOUNCED) ------------------
+    _previewAudioUrl: '',
+    _previewDebounceTimer: null,
+
+    debounceWordPreview: function(value) {
+        clearTimeout(this._previewDebounceTimer);
+        const panel = document.getElementById('word-preview-panel');
+        if (!value || !value.trim() || value.trim().length < 2) {
+            if (panel) panel.classList.add('hidden');
+            return;
+        }
+        this._previewDebounceTimer = setTimeout(() => {
+            this.previewWordData(value.trim());
+        }, 600);
+    },
+
+    previewWordData: async function(word) {
+        const panel = document.getElementById('word-preview-panel');
+        const loadingEl = document.getElementById('preview-loading');
+        const wordEl = document.getElementById('preview-word');
+        const phoneticEl = document.getElementById('preview-phonetic');
+        const meaningEl = document.getElementById('preview-meaning');
+        const exampleEl = document.getElementById('preview-example');
+        const audioBtn = document.getElementById('preview-audio-btn');
+        if (!panel) return;
+
+        panel.classList.remove('hidden');
+        if (loadingEl) loadingEl.classList.remove('hidden');
+        if (wordEl) wordEl.textContent = word;
+        if (phoneticEl) phoneticEl.textContent = '';
+        if (meaningEl) meaningEl.textContent = '단어 정보를 불러오는 중...';
+        if (exampleEl) exampleEl.textContent = '';
+        if (audioBtn) audioBtn.classList.add('hidden');
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/words/lookup?word=${encodeURIComponent(word)}`);
+            if (!res.ok) throw new Error('lookup failed');
+            const data = await res.json();
+
+            if (phoneticEl) phoneticEl.textContent = data.phonetic || '';
+            if (meaningEl) meaningEl.textContent = data.meaning || '(뜻 정보 없음)';
+            if (exampleEl) exampleEl.textContent = data.example_en ? `"${data.example_en}"` + (data.example_kr ? ` — ${data.example_kr}` : '') : '';
+            this._previewAudioUrl = data.audio_url || '';
+            if (audioBtn) {
+                audioBtn.classList.toggle('hidden', !data.audio_url);
+            }
+        } catch (e) {
+            if (meaningEl) meaningEl.textContent = '(백엔드에 연결 후 자동 수집 가능)';
+        } finally {
+            if (loadingEl) loadingEl.classList.add('hidden');
         }
     },
 

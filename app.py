@@ -314,7 +314,27 @@ except Exception as _db_err:
     print("Database initialization notice:", _db_err)
 
 
-# ------------------- REST API ENDPOINTS -------------------
+@app.route("/api/words/lookup", methods=["GET"])
+def lookup_word():
+    """Real-time word lookup for preview (does NOT save to DB)."""
+    word_text = request.args.get("word", "").strip().lower()
+    if not word_text:
+        return jsonify({"error": "word parameter required"}), 400
+
+    # Check if already in DB
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT word, meaning, phonetic, audio_url, example_en, example_kr FROM words WHERE word = ?", (word_text,))
+    existing = cursor.fetchone()
+    conn.close()
+
+    if existing and existing["meaning"] and not existing["meaning"].endswith("(뜻 정보를 입력해주세요)"):
+        return jsonify(dict(existing)), 200
+
+    # Fetch from Naver dictionary
+    result = fetch_naver_dictionary(word_text)
+    return jsonify(result), 200
+
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
