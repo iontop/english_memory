@@ -1,0 +1,12 @@
+# Render Blueprint Configuration (Infrastructure as Code)
+services:
+  - type: web
+    name: english-memory-backend
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12

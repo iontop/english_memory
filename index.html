@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="English Memory - 네이버 사전 자동 수집 기반 영단어 암기 및 테스트 웹서비스">
+    <title>English Memory | 영단어 암기 & 테스트</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-nav">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('sets')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-bold text-white text-xl fa-brain"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        English Memory
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-normal border border-indigo-500/30">v1.0</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-1">
+                <button id="nav-sets" onclick="app.navigateTo('sets')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-800 text-indigo-400 bg-slate-800/80">
+                    <i class="fa-solid fa-layer-group mr-2"></i>단어 세트
+                </button>
+                <button id="nav-study" onclick="app.navigateTo('study')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-800 text-slate-400">
+                    <i class="fa-solid fa-clone mr-2"></i>암기 학습
+                </button>
+                <button id="nav-manager" onclick="app.navigateTo('manager')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-800 text-slate-400">
+                    <i class="fa-solid fa-plus-minus mr-2"></i>단어 관리
+                </button>
+                <button id="nav-quiz" onclick="app.navigateTo('quiz')" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-800 text-slate-400">
+                    <i class="fa-solid fa-circle-question mr-2"></i>테스트 모드
+                </button>
+            </nav>
+
+            <!-- Backend Server Status Indicator -->
+            <div onclick="app.promptCustomServerUrl()" class="flex items-center space-x-2 bg-slate-800/60 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700/50 text-xs cursor-pointer transition" title="클릭하여 Render 서버 URL 변경/설정">
+                <span id="server-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="server-status-text" class="text-slate-300 font-medium">연결됨</span>
+                <i class="fa-solid fa-gear text-slate-500 text-[10px]"></i>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Bottom Bar -->
+        <div class="md:hidden flex justify-around bg-slate-900/95 border-t border-slate-800 py-2">
+            <button onclick="app.navigateTo('sets')" class="flex flex-col items-center text-xs text-indigo-400 py-1 px-3">
+                <i class="fa-solid fa-layer-group text-lg mb-0.5"></i>세트
+            </button>
+            <button onclick="app.navigateTo('study')" class="flex flex-col items-center text-xs text-slate-400 py-1 px-3">
+                <i class="fa-solid fa-clone text-lg mb-0.5"></i>학습
+            </button>
+            <button onclick="app.navigateTo('manager')" class="flex flex-col items-center text-xs text-slate-400 py-1 px-3">
+                <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>관리
+            </button>
+            <button onclick="app.navigateTo('quiz')" class="flex flex-col items-center text-xs text-slate-400 py-1 px-3">
+                <i class="fa-solid fa-vial text-lg mb-0.5"></i>테스트
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Notification / Toast Message Area -->
+        <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <!-- ==================== VIEW 1: WORD SETS DASHBOARD ==================== -->
+        <section id="view-sets" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-800/80 to-indigo-950/50 p-6 rounded-2xl border border-slate-700/60 shadow-xl">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span>내 단어장 세트</span>
+                        <span id="total-sets-badge" class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">0 개</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">네이버 사전 자동 수집으로 나만의 맞춤 영단어장을 만들고 학습해보세요.</p>
+                </div>
+                <button onclick="app.openCreateSetModal()" class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold shadow-lg shadow-indigo-500/25 transition-all duration-200 active:scale-95">
+                    <i class="fa-solid fa-plus mr-2"></i>새 단어장 만들기
+                </button>
+            </div>
+
+            <!-- Word Sets Grid List -->
+            <div id="sets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Skeleton Loading Placeholder -->
+                <div class="glass-panel p-6 rounded-2xl animate-pulse space-y-4">
+                    <div class="h-6 bg-slate-700 rounded w-3/4"></div>
+                    <div class="h-4 bg-slate-700/60 rounded w-full"></div>
+                    <div class="h-10 bg-slate-700/80 rounded-xl w-full"></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== VIEW 2: FLASHCARD STUDY MODE ==================== -->
+        <section id="view-study" class="hidden space-y-6">
+            <!-- Study Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="study-set-title" class="text-lg font-bold text-white">단어 세트 선택 필요</span>
+                        <span id="study-progress-counter" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300">0 / 0</span>
+                    </div>
+                    <p id="study-set-desc" class="text-xs text-slate-400 mt-1">플래시카드를 클릭하여 한글 뜻과 예문을 확인하세요.</p>
+                </div>
+                
+                <!-- Quick Set Selector Dropdown -->
+                <div class="flex items-center gap-2">
+                    <select id="study-set-select" onchange="app.loadStudySet(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <!-- Options populated via JS -->
+                    </select>
+                    <button onclick="app.shuffleStudyWords()" title="단어 순서 섞기" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                        <i class="fa-solid fa-shuffle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div id="study-progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+
+            <!-- 3D Interactive Flashcard Container -->
+            <div class="max-w-xl mx-auto">
+                <div id="flashcard" class="flip-card" onclick="app.flipCard()">
+                    <div id="flashcard-inner" class="flip-card-inner">
+                        <!-- FRONT SIDE: ENGLISH WORD & AUDIO -->
+                        <div class="flip-card-front">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-4 px-3 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">English Word</span>
+                            <h3 id="card-word" class="text-4xl font-extrabold text-white tracking-wide mb-2">Select a Set</h3>
+                            <p id="card-phonetic" class="text-lg text-slate-400 mb-6 font-mono">[ ... ]</p>
+                            
+                            <!-- Audio Play Button -->
+                            <button onclick="event.stopPropagation(); app.playCurrentWordAudio();" class="audio-btn w-14 h-14 rounded-full bg-indigo-600/80 hover:bg-indigo-500 flex items-center justify-center text-white text-xl shadow-lg shadow-indigo-500/40">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <span class="text-xs text-slate-500 mt-6"><i class="fa-solid fa-hand-pointer mr-1"></i>카드를 터치/클릭하면 뒤집힙니다</span>
+                        </div>
+
+                        <!-- BACK SIDE: KOREAN MEANING & EXAMPLES -->
+                        <div class="flip-card-back">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-purple-300 mb-3 px-3 py-1 bg-purple-500/20 rounded-full border border-purple-400/30">Korean Meaning</span>
+                            <h4 id="card-meaning" class="text-2xl font-bold text-white mb-6">한글 뜻</h4>
+                            
+                            <!-- Example Box -->
+                            <div class="bg-slate-900/60 p-4 rounded-xl text-left border border-indigo-400/20 w-full space-y-2">
+                                <p class="text-xs text-indigo-300 font-semibold uppercase tracking-wider">Example</p>
+                                <p id="card-ex-en" class="text-sm text-slate-200 font-medium italic">"Sentence example here."</p>
+                                <p id="card-ex-kr" class="text-xs text-slate-400">"해석 예문이 여기에 표시됩니다."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flashcard Navigation Controls -->
+            <div class="max-w-xl mx-auto flex items-center justify-between gap-4">
+                <button onclick="app.prevCard()" class="flex-1 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i>이전 단어
+                </button>
+                <button onclick="app.flipCard()" class="px-5 py-3.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-300 font-semibold transition">
+                    <i class="fa-solid fa-rotate mr-1"></i>뒤집기
+                </button>
+                <button onclick="app.nextCard()" class="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition active:scale-95 flex items-center justify-center gap-2">
+                    다음 단어<i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <!-- Keyboard Shortcuts Hint -->
+            <div class="text-center text-xs text-slate-500 hidden sm:block">
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">← 이전</span>
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700 mx-2">Space 뒤집기</span>
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">→ 다음</span>
+            </div>
+        </section>
+
+
+        <!-- ==================== VIEW 3: WORD MANAGER & AUTO-COLLECTOR ==================== -->
+        <section id="view-manager" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
+                    <span>단어 자동 수집 & 세트 추가</span>
+                </h2>
+                <p class="text-xs text-slate-400">네이버 사전 API 및 사전 데이터로부터 영단어 뜻, 발음기호, MP3 오디오, 예문을 자동으로 수집합니다.</p>
+
+                <!-- Word Input Form -->
+                <form onsubmit="app.handleAutoAddWord(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
+                    <!-- Set Selection Dropdown -->
+                    <div class="sm:col-span-4">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">등록할 단어장 세트</label>
+                        <select id="manager-set-select" onchange="app.loadManagerSetWords(this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+
+                    <!-- Word Search Input -->
+                    <div class="sm:col-span-5">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">영단어 입력 (English Word)</label>
+                        <input type="text" id="input-word-text" placeholder="예: resilient, ephemeral, apple" required autocomplete="off" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-sm rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+
+                    <!-- Auto Add Button -->
+                    <div class="sm:col-span-3 flex items-end">
+                        <button type="submit" id="btn-auto-add" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-semibold shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2">
+                            <span id="spinner-auto-add" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>자동 수집 및 추가
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Words List in Selected Set -->
+            <div class="glass-panel p-6 rounded-2xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <span>현재 세트에 등록된 단어</span>
+                        <span id="manager-words-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">0개</span>
+                    </h3>
+                    <span id="manager-current-set-title" class="text-xs text-indigo-400 font-medium"></span>
+                </div>
+
+                <!-- Word Items List -->
+                <div id="manager-words-list" class="divide-y divide-slate-800/80">
+                    <p class="text-center text-slate-500 text-sm py-8">선택된 세트에 등록된 단어가 없습니다.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== VIEW 4: QUIZ & TESTING SUITE ==================== -->
+        <section id="view-quiz" class="hidden space-y-6">
+            <!-- Quiz Configuration Card -->
+            <div id="quiz-setup-card" class="glass-panel p-6 rounded-2xl max-w-xl mx-auto space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 mx-auto flex items-center justify-center text-2xl border border-indigo-500/30">
+                        <i class="fa-solid fa-vial-circle-check"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">단어 테스트 시작하기</h2>
+                    <p class="text-xs text-slate-400">학습한 단어장을 선택하고 퀴즈 모드로 실력을 점검하세요.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- 1. Select Set -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">1. 테스트할 단어장 선택</label>
+                        <select id="quiz-set-select" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+
+                    <!-- 2. Select Test Type -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">2. 테스트 유형 선택</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="cursor-pointer border border-slate-700 bg-slate-900/60 p-3 rounded-xl flex flex-col items-center gap-1 hover:border-indigo-500 transition has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-950/40">
+                                <input type="radio" name="quiz-type" value="multiple" checked class="hidden">
+                                <i class="fa-solid fa-list-check text-indigo-400 text-lg"></i>
+                                <span class="text-xs font-semibold text-slate-200">객관식 퀴즈</span>
+                            </label>
+                            <label class="cursor-pointer border border-slate-700 bg-slate-900/60 p-3 rounded-xl flex flex-col items-center gap-1 hover:border-indigo-500 transition has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-950/40">
+                                <input type="radio" name="quiz-type" value="spelling" class="hidden">
+                                <i class="fa-solid fa-pen-keyboard text-purple-400 text-lg"></i>
+                                <span class="text-xs font-semibold text-slate-200">주관식 퀴즈</span>
+                            </label>
+                            <label class="cursor-pointer border border-slate-700 bg-slate-900/60 p-3 rounded-xl flex flex-col items-center gap-1 hover:border-indigo-500 transition has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-950/40">
+                                <input type="radio" name="quiz-type" value="listening" class="hidden">
+                                <i class="fa-solid fa-headphones text-emerald-400 text-lg"></i>
+                                <span class="text-xs font-semibold text-slate-200">듣기 테스트</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="app.startQuiz()" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold shadow-lg shadow-indigo-500/30 transition active:scale-95">
+                    테스트 시작하기 <i class="fa-solid fa-play ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Active Quiz Question Card -->
+            <div id="quiz-active-card" class="hidden glass-panel p-6 rounded-2xl max-w-xl mx-auto space-y-6">
+                <!-- Header Status -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <span id="quiz-mode-badge" class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">객관식 퀴즈</span>
+                    <span id="quiz-question-counter" class="text-sm font-bold text-slate-300">문제 1 / 10</span>
+                </div>
+
+                <!-- Question Prompt -->
+                <div class="text-center py-4 space-y-3">
+                    <span class="text-xs text-slate-400 font-medium">다음 문제의 정답을 맞추세요</span>
+                    <h3 id="quiz-prompt-text" class="text-3xl font-extrabold text-white tracking-wide">apple</h3>
+                    <button id="quiz-audio-btn" onclick="app.playQuizAudio()" class="hidden mx-auto w-12 h-12 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-lg shadow-md flex items-center justify-center transition">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
+
+                <!-- Answer Input Area (Dynamic per mode) -->
+                <div id="quiz-answers-container" class="space-y-3">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Submit / Next Question Button -->
+                <button id="quiz-submit-btn" onclick="app.submitQuizAnswer()" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition">
+                    정답 제출
+                </button>
+            </div>
+
+            <!-- Quiz Result Summary Card -->
+            <div id="quiz-result-card" class="hidden glass-panel p-6 rounded-2xl max-w-xl mx-auto space-y-6 text-center">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center text-4xl mx-auto shadow-xl shadow-indigo-500/40">
+                    <i id="result-icon" class="fa-solid fa-trophy"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">테스트 결과</h2>
+                    <p id="result-score-text" class="text-4xl font-black text-indigo-400 my-2">90점</p>
+                    <p id="result-summary-detail" class="text-sm text-slate-400">10 문제 중 9 문제를 맞추셨습니다!</p>
+                </div>
+
+                <!-- Wrong Words Review List -->
+                <div id="wrong-words-section" class="text-left bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3 hidden">
+                    <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-circle-xmark"></i>틀린 단어 목록
+                    </h4>
+                    <div id="wrong-words-list" class="divide-y divide-slate-800 text-sm"></div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button onclick="app.navigateTo('sets')" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-sm font-semibold transition">
+                        메인으로 이동
+                    </button>
+                    <button id="btn-review-wrong" onclick="app.startWrongWordsQuiz()" class="hidden flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold shadow-lg shadow-rose-600/30 transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i>틀린 단어 재시험
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Create Set Modal -->
+    <div id="modal-create-set" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden px-4">
+        <div class="glass-panel p-6 rounded-2xl max-w-md w-full space-y-5 border border-slate-700 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-indigo-400"></i>새 단어장 만들기
+                </h3>
+                <button onclick="app.closeCreateSetModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="app.handleCreateSetSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">단어장 제목 *</label>
+                    <input type="text" id="modal-input-title" required placeholder="예: 토익 필수 영단어 100" class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">단어장 설명</label>
+                    <textarea id="modal-input-desc" rows="3" placeholder="단어장에 대한 설명을 입력하세요." class="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="app.closeCreateSetModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition">취소</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition">생성하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
