@@ -10,7 +10,7 @@
     <!-- Font Awesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Pretendard & Inter Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css?v=0.1.3">
+    <link rel="stylesheet" href="css/styles.css?v=0.1.4">
 </head>
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
@@ -60,8 +60,8 @@
 
                 <!-- Backend Server Status Indicator -->
                 <div onclick="app.promptCustomServerUrl()" class="flex items-center space-x-2 glass-panel px-3 sm:px-3.5 py-1.5 rounded-full text-xs cursor-pointer transition shadow-sm hover:border-purple-500/40" title="클릭하여 Render 백엔드 서버 URL 설정">
-                    <span id="server-status-dot" class="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse"></span>
-                    <span id="server-status-text" class="font-semibold text-xs">상태 확인 중...</span>
+                    <span id="server-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="server-status-text" class="font-semibold text-xs text-emerald-600 dark:text-emerald-400">정상 작동 중</span>
                     <i class="fa-solid fa-gear opacity-60 text-[10px]"></i>
                 </div>
             </div>
@@ -447,7 +447,7 @@
     </div>
 
     <!-- JS Scripts -->
-    <script src="js/config.js?v=0.1.3"></script>
-    <script src="js/app.js?v=0.1.3"></script>
+    <script src="js/config.js?v=0.1.4"></script>
+    <script src="js/app.js?v=0.1.4"></script>
 </body>
 </html>

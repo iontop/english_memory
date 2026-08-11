@@ -149,40 +149,41 @@ const app = {
         const text = document.getElementById("server-status-text");
         if (!dot || !text) return;
 
-        const fetchOptions = {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-store',
-            headers: { 'Accept': 'application/json' }
-        };
+        const customUrl = localStorage.getItem("CUSTOM_API_BASE_URL");
 
-        try {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 5000);
-            
-            // Try fast health endpoint first
-            let res = await fetch(`${API_BASE_URL}/health`, { ...fetchOptions, signal: controller.signal }).catch(() => null);
-            if (!res || !res.ok) {
-                res = await fetch(`${API_BASE_URL}/sets`, { ...fetchOptions, signal: controller.signal }).catch(() => null);
-            }
-            clearTimeout(timer);
+        if (customUrl) {
+            const fetchOptions = {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-store',
+                headers: { 'Accept': 'application/json' }
+            };
 
-            if (res && res.ok) {
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 4000);
+                
+                let res = await fetch(`${API_BASE_URL}/health`, { ...fetchOptions, signal: controller.signal }).catch(() => null);
+                if (!res || !res.ok) {
+                    res = await fetch(`${API_BASE_URL}/sets`, { ...fetchOptions, signal: controller.signal }).catch(() => null);
+                }
+                clearTimeout(timer);
+
+                if (res && res.ok) {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                    text.textContent = "백엔드 동기화됨";
+                } else {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+                    text.textContent = "백엔드 준비 중";
+                }
+            } catch (e) {
                 dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-                text.textContent = "동기화 완료";
-                if (this._healthTimer) clearTimeout(this._healthTimer);
-                this._healthTimer = setTimeout(() => this.checkServerHealth(), 30000);
-            } else {
-                dot.className = "w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse";
-                text.textContent = "오프라인 모드";
-                if (this._healthTimer) clearTimeout(this._healthTimer);
-                this._healthTimer = setTimeout(() => this.checkServerHealth(), 6000);
+                text.textContent = "정상 작동 중";
             }
-        } catch (e) {
-            dot.className = "w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse";
-            text.textContent = "오프라인 모드";
-            if (this._healthTimer) clearTimeout(this._healthTimer);
-            this._healthTimer = setTimeout(() => this.checkServerHealth(), 6000);
+        } else {
+            // Standalone Online Client Engine (GitHub Pages)
+            dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+            text.textContent = "정상 작동 중";
         }
     },
 
