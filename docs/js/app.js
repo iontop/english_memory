@@ -168,15 +168,15 @@ const app = {
                 this._healthTimer = setTimeout(() => this.checkServerHealth(), 30000);
             } else {
                 dot.className = "w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse";
-                text.textContent = "오프라인 학습 가능";
+                text.textContent = "오프라인 모드";
                 if (this._healthTimer) clearTimeout(this._healthTimer);
-                this._healthTimer = setTimeout(() => this.checkServerHealth(), 5000);
+                this._healthTimer = setTimeout(() => this.checkServerHealth(), 6000);
             }
         } catch (e) {
             dot.className = "w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse";
-            text.textContent = "오프라인 학습 가능";
+            text.textContent = "오프라인 모드";
             if (this._healthTimer) clearTimeout(this._healthTimer);
-            this._healthTimer = setTimeout(() => this.checkServerHealth(), 5000);
+            this._healthTimer = setTimeout(() => this.checkServerHealth(), 6000);
         }
     },
 
