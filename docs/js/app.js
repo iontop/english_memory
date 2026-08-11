@@ -483,53 +483,65 @@ const app = {
         const customSets = this.getCustomWordSetsFromStorage();
         const presetIds = new Set(PRESET_WORD_SETS.map(s => s.id));
 
-        // 1. Initial render using PRESET_WORD_SETS + Local Custom Sets
+        // 1. Initial render with local data (instant, no lag)
         const initialMerged = [...PRESET_WORD_SETS];
         customSets.forEach(cs => {
-            if (!presetIds.has(cs.id)) {
-                initialMerged.push(cs);
-            }
+            if (!presetIds.has(cs.id)) initialMerged.push(cs);
         });
-
         this.state.wordSets = initialMerged;
         this.renderWordSetsGrid(initialMerged);
         this.populateSetDropdowns();
 
-        // 2. Background async fetch from Render backend (if available)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        // 2. Backend fetch — retry up to 2 times with 30s timeout (handles Render cold start)
+        const tryFetch = async (attempt) => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+            try {
+                const res = await fetch(`${API_BASE_URL}/sets`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (!res.ok) return false;
 
-        try {
-            const res = await fetch(`${API_BASE_URL}/sets`, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (res.ok) {
                 const backendSets = await res.json();
-                if (backendSets && backendSets.length > 0) {
-                    const existingMap = new Map((this.state.wordSets || []).map(s => [s.id, s]));
-                    const backendSetIds = new Set(backendSets.map(s => s.id));
+                if (!backendSets || backendSets.length === 0) return false;
 
-                    const finalSets = [...backendSets];
-                    customSets.forEach(cs => {
-                        if (!backendSetIds.has(cs.id)) {
-                            finalSets.push(cs);
-                        }
-                    });
+                const existingMap = new Map((this.state.wordSets || []).map(s => [s.id, s]));
+                const backendSetIds = new Set(backendSets.map(s => s.id));
 
-                    finalSets.forEach(s => {
-                        const existing = existingMap.get(s.id);
-                        if (existing && existing.words && !s.words) {
-                            s.words = existing.words;
-                        }
-                    });
+                // Backend is primary — put backend sets first, then local-only custom sets
+                const finalSets = [...backendSets];
+                customSets.forEach(cs => {
+                    if (!backendSetIds.has(cs.id)) finalSets.push(cs);
+                });
 
-                    this.state.wordSets = finalSets;
-                    this.saveCustomWordSetsToStorage();
-                    this.renderWordSetsGrid(finalSets);
-                    this.populateSetDropdowns();
-                }
+                // Preserve locally cached word arrays
+                finalSets.forEach(s => {
+                    const existing = existingMap.get(s.id);
+                    if (existing && existing.words && !s.words) s.words = existing.words;
+                });
+
+                this.state.wordSets = finalSets;
+                this.saveCustomWordSetsToStorage();
+                this.renderWordSetsGrid(finalSets);
+                this.populateSetDropdowns();
+
+                // Update server status badge
+                const dot = document.getElementById('server-status-dot');
+                const txt = document.getElementById('server-status-text');
+                if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+                if (txt) txt.textContent = '백엔드 동기화됨';
+                return true;
+            } catch (err) {
+                clearTimeout(timeoutId);
+                return false;
             }
-        } catch (err) {
-            clearTimeout(timeoutId);
+        };
+
+        // First attempt
+        const ok = await tryFetch(1);
+        if (!ok) {
+            // Retry once more after 3s for Render cold-start
+            await new Promise(r => setTimeout(r, 3000));
+            await tryFetch(2);
         }
     },
 
@@ -602,15 +614,17 @@ const app = {
             const el = document.getElementById(id);
             if (!el) return;
             const currentVal = el.value;
-            el.innerHTML = sortedSets.map(set => `
-                <option value="${set.id}">${this.escapeHtml(set.title)} (${set.word_count || 30}단어)</option>
-            `).join('');
+            el.innerHTML = sortedSets.map(set => {
+                const wc = set.word_count !== undefined ? set.word_count : (set.words ? set.words.length : 0);
+                return `<option value="${set.id}">${this.escapeHtml(set.title)} (${wc}단어)</option>`;
+            }).join('');
 
             if (currentVal && Array.from(el.options).some(o => o.value === currentVal)) {
                 el.value = currentVal;
             }
         });
         this.renderQuizSetCardsGrid();
+        this.renderManagerSetCardsGrid();
     },
 
     renderQuizSetCardsGrid: function() {
@@ -652,6 +666,7 @@ const app = {
 
         html += sets.map(set => {
             const isSelected = this.state.quizSetId == set.id;
+            const wc = set.word_count !== undefined ? set.word_count : (set.words ? set.words.length : 0);
             return `
                 <div onclick="app.selectQuizSetCard('${set.id}')" class="cursor-pointer p-3.5 rounded-2xl border ${isSelected ? 'border-purple-500 bg-purple-500/10 shadow-md' : 'border-purple-500/20 glass-panel'} flex items-center justify-between transition-all active:scale-95">
                     <div class="flex items-center gap-3 overflow-hidden">
@@ -660,7 +675,7 @@ const app = {
                         </div>
                         <div class="text-left overflow-hidden">
                             <h4 class="font-bold text-xs truncate">${this.escapeHtml(set.title)}</h4>
-                            <p class="typo-muted text-[11px]">${set.word_count || (set.words ? set.words.length : 30)}단어</p>
+                            <p class="typo-muted text-[11px]">${wc}단어</p>
                         </div>
                     </div>
                     <div class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-300 dark:border-slate-600'} flex items-center justify-center text-[10px] shrink-0">
@@ -690,6 +705,7 @@ const app = {
 
         const html = sets.map(set => {
             const isSelected = this.state.managerSetId == set.id;
+            const wc = set.word_count !== undefined ? set.word_count : (set.words ? set.words.length : 0);
             return `
                 <div onclick="app.selectManagerSetCard('${set.id}')" class="cursor-pointer p-3.5 rounded-2xl border ${isSelected ? 'border-purple-500 bg-purple-500/10 shadow-md' : 'border-purple-500/20 glass-panel'} flex items-center justify-between transition-all active:scale-95">
                     <div class="flex items-center gap-3 overflow-hidden">
@@ -698,7 +714,7 @@ const app = {
                         </div>
                         <div class="text-left overflow-hidden">
                             <h4 class="font-bold text-xs truncate">${this.escapeHtml(set.title)}</h4>
-                            <p class="typo-muted text-[11px]">${set.word_count || (set.words ? set.words.length : 30)}단어</p>
+                            <p class="typo-muted text-[11px]">${wc}단어</p>
                         </div>
                     </div>
                     <div class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-300 dark:border-slate-600'} flex items-center justify-center text-[10px] shrink-0">
@@ -1018,21 +1034,49 @@ const app = {
         const word = wordInput.value.trim();
 
         if (!setId || !word) {
-            this.showToast("단어장 세트와 영단어를 모두 입력해주세요.", "error");
+            this.showToast('단어장 세트와 영단어를 모두 입력해주세요.', 'error');
             return;
         }
 
         spinner.classList.remove('hidden');
         btn.disabled = true;
 
+        // Use cached preview data if available (avoids duplicate API call)
+        const cachedPreview = {
+            meaning: document.getElementById('preview-meaning')?.textContent || '',
+            phonetic: document.getElementById('preview-phonetic')?.textContent || '',
+            audio_url: this._previewAudioUrl || '',
+            example_en: '',
+            example_kr: ''
+        };
+        const exRaw = document.getElementById('preview-example')?.textContent || '';
+        if (exRaw.includes(' — ')) {
+            const parts = exRaw.replace(/^"|"$/g, '').split(' — ');
+            cachedPreview.example_en = parts[0] || '';
+            cachedPreview.example_kr = parts[1] || '';
+        } else if (exRaw) {
+            cachedPreview.example_en = exRaw.replace(/^"|"$/g, '');
+        }
+        const hasCachedData = cachedPreview.meaning && !cachedPreview.meaning.includes('백엔드에 연결');
+
         try {
+            const payload = { set_id: parseInt(setId), word: word };
+            // Pass cached preview data to backend so it doesn't re-scrape
+            if (hasCachedData) {
+                payload.meaning = cachedPreview.meaning;
+                payload.phonetic = cachedPreview.phonetic;
+                payload.audio_url = cachedPreview.audio_url;
+                payload.example_en = cachedPreview.example_en;
+                payload.example_kr = cachedPreview.example_kr;
+            }
+
             const res = await fetch(`${API_BASE_URL}/words/auto-add`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ set_id: parseInt(setId), word: word })
+                body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error("자동 수집 및 등록 실패");
+            if (!res.ok) throw new Error('자동 수집 및 등록 실패');
             const data = await res.json();
 
             const targetSet = this.state.wordSets.find(s => s.id == setId);
@@ -1048,21 +1092,74 @@ const app = {
             }
 
             this.saveCustomWordSetsToStorage();
-            this.showToast(`'${word}' 단어가 세트에 성공적으로 등록되었습니다! ✨`, "success");
+            // Hide preview panel after successful add
+            const panel = document.getElementById('word-preview-panel');
+            if (panel) panel.classList.add('hidden');
+            this.showToast(`'${word}' 단어가 세트에 성공적으로 등록되었습니다! ✨`, 'success');
             wordInput.value = '';
             await this.loadManagerSetWords(setId);
-            await this.loadWordSets();
+            // Refresh word counts in grids
+            this.renderManagerSetCardsGrid();
+            this.renderQuizSetCardsGrid();
+            this.renderWordSetsGrid(this.state.wordSets);
         } catch (err) {
-            // Fallback for standalone offline addition
+            // Offline fallback: try FreeDictionaryAPI from frontend
+            let wordData = { id: Date.now(), word, meaning: '', phonetic: '', audio_url: '', example_en: '', example_kr: '' };
+
+            // First try cached preview data
+            if (hasCachedData) {
+                wordData.meaning = cachedPreview.meaning;
+                wordData.phonetic = cachedPreview.phonetic;
+                wordData.audio_url = cachedPreview.audio_url;
+                wordData.example_en = cachedPreview.example_en;
+                wordData.example_kr = cachedPreview.example_kr;
+            } else {
+                // Try FreeDictionaryAPI as frontend fallback
+                try {
+                    const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+                    if (dictRes.ok) {
+                        const dictData = await dictRes.json();
+                        if (Array.isArray(dictData) && dictData.length > 0) {
+                            const entry = dictData[0];
+                            wordData.phonetic = entry.phonetic || (entry.phonetics?.find(p => p.text)?.text || '');
+                            wordData.audio_url = entry.phonetics?.find(p => p.audio)?.audio || '';
+                            const defs = [];
+                            for (const m of entry.meanings || []) {
+                                for (const d of m.definitions || []) {
+                                    defs.push(d.definition);
+                                    if (!wordData.example_en && d.example) wordData.example_en = d.example;
+                                    if (defs.length >= 3) break;
+                                }
+                                if (defs.length >= 3) break;
+                            }
+                            wordData.meaning = defs.join('; ') || `${word} (뜨 정보 없음)`;
+                        }
+                    }
+                } catch (_) {}
+                if (!wordData.meaning) wordData.meaning = `${word} (오프라인 저장)`;
+            }
+
             const targetSet = this.state.wordSets.find(s => s.id == setId);
             if (targetSet) {
                 targetSet.words = targetSet.words || [];
-                targetSet.words.push({ id: Date.now(), word, meaning: `${word} (수집 단어)`, phonetic: "", audio_url: "" });
+                const existingIdx = targetSet.words.findIndex(w => w.word.toLowerCase() === word.toLowerCase());
+                if (existingIdx >= 0) {
+                    targetSet.words[existingIdx] = { ...targetSet.words[existingIdx], ...wordData };
+                } else {
+                    targetSet.words.push(wordData);
+                }
                 targetSet.word_count = targetSet.words.length;
                 this.saveCustomWordSetsToStorage();
                 this.renderManagerWordsList(targetSet.words, setId);
-                this.showToast(`'${word}' 단어가 추가되었습니다! ✨`, "success");
+                this.renderManagerSetCardsGrid();
+                this.renderQuizSetCardsGrid();
+                this.renderWordSetsGrid(this.state.wordSets);
+                const panel = document.getElementById('word-preview-panel');
+                if (panel) panel.classList.add('hidden');
+                this.showToast(`'${word}' 단어가 추가되었습니다! (오프라인 모드)`, 'success');
                 wordInput.value = '';
+            } else {
+                this.showToast('단어장에 추가 실패했습니다.', 'error');
             }
         } finally {
             spinner.classList.add('hidden');
@@ -1214,24 +1311,63 @@ const app = {
         if (meaningEl) meaningEl.textContent = '단어 정보를 불러오는 중...';
         if (exampleEl) exampleEl.textContent = '';
         if (audioBtn) audioBtn.classList.add('hidden');
+        this._previewAudioUrl = '';
 
+        // Try backend first, fallback to FreeDictionaryAPI
+        let data = null;
         try {
-            const res = await fetch(`${API_BASE_URL}/words/lookup?word=${encodeURIComponent(word)}`);
-            if (!res.ok) throw new Error('lookup failed');
-            const data = await res.json();
+            const controller = new AbortController();
+            const tid = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(`${API_BASE_URL}/words/lookup?word=${encodeURIComponent(word)}`, { signal: controller.signal });
+            clearTimeout(tid);
+            if (res.ok) data = await res.json();
+        } catch (_) {}
 
-            if (phoneticEl) phoneticEl.textContent = data.phonetic || '';
-            if (meaningEl) meaningEl.textContent = data.meaning || '(뜻 정보 없음)';
-            if (exampleEl) exampleEl.textContent = data.example_en ? `"${data.example_en}"` + (data.example_kr ? ` — ${data.example_kr}` : '') : '';
-            this._previewAudioUrl = data.audio_url || '';
-            if (audioBtn) {
-                audioBtn.classList.toggle('hidden', !data.audio_url);
-            }
-        } catch (e) {
-            if (meaningEl) meaningEl.textContent = '(백엔드에 연결 후 자동 수집 가능)';
-        } finally {
-            if (loadingEl) loadingEl.classList.add('hidden');
+        // Fallback: FreeDictionaryAPI (no backend required, works on all devices)
+        if (!data || !data.meaning || data.meaning.endsWith('(뜻 정보를 입력해주세요)')) {
+            try {
+                const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+                if (dictRes.ok) {
+                    const dictData = await dictRes.json();
+                    if (Array.isArray(dictData) && dictData.length > 0) {
+                        const entry = dictData[0];
+                        const phonetic = entry.phonetic || (entry.phonetics?.find(p => p.text)?.text || '');
+                        const audioUrl = entry.phonetics?.find(p => p.audio)?.audio || '';
+                        const defs = [];
+                        let exampleEn = '';
+                        for (const m of entry.meanings || []) {
+                            for (const d of m.definitions || []) {
+                                defs.push(d.definition);
+                                if (!exampleEn && d.example) exampleEn = d.example;
+                                if (defs.length >= 3) break;
+                            }
+                            if (defs.length >= 3) break;
+                        }
+                        data = {
+                            word,
+                            phonetic,
+                            audio_url: audioUrl,
+                            meaning: defs.join('; ') || '',
+                            example_en: exampleEn,
+                            example_kr: ''
+                        };
+                    }
+                }
+            } catch (_) {}
         }
+
+        if (data && data.meaning) {
+            if (phoneticEl) phoneticEl.textContent = data.phonetic || '';
+            if (meaningEl) meaningEl.textContent = data.meaning;
+            if (exampleEl) exampleEl.textContent = data.example_en
+                ? `"${data.example_en}"${data.example_kr ? ` — ${data.example_kr}` : ''}`
+                : '';
+            this._previewAudioUrl = data.audio_url || '';
+            if (audioBtn) audioBtn.classList.toggle('hidden', !data.audio_url);
+        } else {
+            if (meaningEl) meaningEl.textContent = '(단어를 찾지 못했습니다 — 직접 입력하여 등록하세요)';
+        }
+        if (loadingEl) loadingEl.classList.add('hidden');
     },
 
     playAudioUrl: function(url, text) {
