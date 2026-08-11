@@ -134,33 +134,39 @@ input[type="text"], textarea, select {
     transform: translateY(-1px);
 }
 
-/* 3D 플래시카드 플립 애니메이션 */
-.perspective-1000 {
+/* 3D 플래시카드 플립 애니메이션 (iOS Safari WebKit 3D Compositing 완전 보정) */
+.perspective-container {
     perspective: 1000px;
+    -webkit-perspective: 1000px;
+    position: relative;
+    width: 100%;
+    height: 380px;
+    margin: 0 auto;
 }
 
 .flip-card {
     background-color: transparent;
     width: 100%;
-    height: 380px;
-    perspective: 1000px;
-    -webkit-perspective: 1000px;
-    cursor: pointer;
+    height: 100%;
     position: relative;
-    overflow: visible;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .flip-card-inner {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     text-align: center;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-transition: -webkit-transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
-    transform-origin: center center;
-    -webkit-transform-origin: center center;
+    transform-origin: 50% 50%;
+    -webkit-transform-origin: 50% 50%;
     will-change: transform;
 }
 
@@ -170,37 +176,40 @@ input[type="text"], textarea, select {
 }
 
 .flip-card-front, .flip-card-back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    transform-style: preserve-3d !important;
+    -webkit-transform-style: preserve-3d !important;
     border-radius: 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    padding: 1.75rem;
     box-shadow: var(--card-shadow);
     box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 
 .flip-card-front {
     background-color: var(--card-bg);
     border: 2px solid var(--primary-brand);
-    transform: rotateY(0deg);
-    -webkit-transform: rotateY(0deg);
+    transform: rotateY(0deg) translateZ(1px);
+    -webkit-transform: rotateY(0deg) translateZ(1px);
 }
 
 .flip-card-back {
     background-color: var(--card-bg);
     border: 2px solid var(--secondary-point);
-    transform: rotateY(180deg);
-    -webkit-transform: rotateY(180deg);
+    transform: rotateY(180deg) translateZ(1px);
+    -webkit-transform: rotateY(180deg) translateZ(1px);
 }
 
 .badge-soft {
