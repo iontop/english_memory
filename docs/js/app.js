@@ -92,6 +92,11 @@ const app = {
         currentStudyIndex: 0,
         isFlipped: false,
         
+        // Bookmarks & Unmemorized Review State
+        favorites: [],
+        unmemorized: [],
+        activeBookmarkTab: 'favorites',
+
         // Quiz State
         quizSetId: null,
         quizType: 'multiple',
@@ -105,6 +110,7 @@ const app = {
     init: function() {
         console.log("Initializing English Memory App with API:", API_BASE_URL);
         this.initTheme();
+        this.initBookmarks();
         this.loadWordSets(); // Immediately load presets so UI renders with 0ms delay!
         this.checkServerHealth();
         this.bindKeyboardShortcuts();
@@ -190,7 +196,7 @@ const app = {
 
     navigateTo: function(viewName) {
         this.state.currentView = viewName;
-        ['sets', 'study', 'manager', 'quiz'].forEach(v => {
+        ['sets', 'study', 'bookmarks', 'manager', 'quiz'].forEach(v => {
             const el = document.getElementById(`view-${v}`);
             const navBtn = document.getElementById(`nav-${v}`);
             const mobileBtn = document.getElementById(`mobile-nav-${v}`);
@@ -198,18 +204,18 @@ const app = {
             if (v === viewName) {
                 if (el) el.classList.remove('hidden');
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 btn-primary shadow-sm";
+                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 btn-primary shadow-sm flex items-center gap-1.5";
                 }
                 if (mobileBtn) {
-                    mobileBtn.className = "flex flex-col items-center text-xs font-bold text-purple-600 dark:text-purple-400 py-1 px-3";
+                    mobileBtn.className = "flex flex-col items-center text-xs font-bold text-purple-600 dark:text-purple-400 py-1 px-2 relative";
                 }
             } else {
                 if (el) el.classList.add('hidden');
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted";
+                    navBtn.className = "px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 hover:bg-purple-500/10 typo-muted flex items-center gap-1.5";
                 }
                 if (mobileBtn) {
-                    mobileBtn.className = "flex flex-col items-center text-xs font-bold typo-muted py-1 px-3";
+                    mobileBtn.className = "flex flex-col items-center text-xs font-bold typo-muted py-1 px-2 relative";
                 }
             }
         });
@@ -221,6 +227,8 @@ const app = {
             if (this.state.wordSets.length > 0 && !this.state.currentStudySetId) {
                 this.loadStudySet(this.state.wordSets[0].id);
             }
+        } else if (viewName === 'bookmarks') {
+            this.renderBookmarkWordsList();
         } else if (viewName === 'manager') {
             this.populateSetDropdowns();
             const managerSelect = document.getElementById('manager-set-select');
@@ -487,6 +495,8 @@ const app = {
         document.getElementById('card-meaning').textContent = wordObj.meaning || '뜻 정보 없음';
         document.getElementById('card-ex-en').textContent = wordObj.example_en ? `"${wordObj.example_en}"` : '';
         document.getElementById('card-ex-kr').textContent = wordObj.example_kr ? `"${wordObj.example_kr}"` : '';
+
+        this.updateCardHeartIcon();
     },
 
     flipCard: function() {
@@ -885,6 +895,197 @@ const app = {
         document.getElementById('quiz-result-card').classList.add('hidden');
         document.getElementById('quiz-active-card').classList.remove('hidden');
 
+        this.renderQuizQuestion();
+    },
+
+    // ------------------ BOOKMARKS & UNMEMORIZED REVIEW ENGINE ------------------
+    initBookmarks: function() {
+        try {
+            this.state.favorites = JSON.parse(localStorage.getItem("USER_FAVORITES") || "[]");
+            this.state.unmemorized = JSON.parse(localStorage.getItem("USER_UNMEMORIZED") || "[]");
+        } catch (e) {
+            this.state.favorites = [];
+            this.state.unmemorized = [];
+        }
+        this.updateBookmarkBadges();
+    },
+
+    saveBookmarks: function() {
+        localStorage.setItem("USER_FAVORITES", JSON.stringify(this.state.favorites));
+        localStorage.setItem("USER_UNMEMORIZED", JSON.stringify(this.state.unmemorized));
+        this.updateBookmarkBadges();
+    },
+
+    updateBookmarkBadges: function() {
+        const favCount = this.state.favorites ? this.state.favorites.length : 0;
+        const unmemCount = this.state.unmemorized ? this.state.unmemorized.length : 0;
+        const total = favCount + unmemCount;
+
+        const navBadge = document.getElementById("nav-bookmark-badge");
+        const mobileBadge = document.getElementById("mobile-bookmark-badge");
+        const countFav = document.getElementById("count-favorites");
+        const countUnmem = document.getElementById("count-unmemorized");
+
+        if (navBadge) {
+            navBadge.textContent = favCount;
+            navBadge.classList.toggle("hidden", favCount === 0);
+        }
+        if (mobileBadge) {
+            mobileBadge.classList.toggle("hidden", total === 0);
+        }
+        if (countFav) countFav.textContent = favCount;
+        if (countUnmem) countUnmem.textContent = unmemCount;
+    },
+
+    toggleBookmarkCurrentWord: function() {
+        const words = this.state.currentStudyWords;
+        const idx = this.state.currentStudyIndex;
+        if (!words || !words[idx]) return;
+
+        const currentWord = words[idx];
+        const existingIdx = this.state.favorites.findIndex(w => w.word.toLowerCase() === currentWord.word.toLowerCase());
+
+        if (existingIdx >= 0) {
+            this.state.favorites.splice(existingIdx, 1);
+            this.showToast(`'${currentWord.word}' 중요 단어 해제`, "info");
+        } else {
+            this.state.favorites.push(currentWord);
+            this.showToast(`'${currentWord.word}' 중요 단어장에 추가됨 💖`, "success");
+        }
+
+        this.saveBookmarks();
+        this.updateCardHeartIcon();
+    },
+
+    markCurrentWordStatus: function(isMemorized) {
+        const words = this.state.currentStudyWords;
+        const idx = this.state.currentStudyIndex;
+        if (!words || !words[idx]) return;
+
+        const currentWord = words[idx];
+        const existingIdx = this.state.unmemorized.findIndex(w => w.word.toLowerCase() === currentWord.word.toLowerCase());
+
+        if (isMemorized) {
+            if (existingIdx >= 0) {
+                this.state.unmemorized.splice(existingIdx, 1);
+            }
+            this.showToast(`'${currentWord.word}' 암기 완료! 🎉`, "success");
+        } else {
+            if (existingIdx < 0) {
+                this.state.unmemorized.push(currentWord);
+            }
+            this.showToast(`'${currentWord.word}' 복습 노트에 추가됨 💡`, "info");
+        }
+
+        this.saveBookmarks();
+        this.nextCard();
+    },
+
+    updateCardHeartIcon: function() {
+        const words = this.state.currentStudyWords;
+        const idx = this.state.currentStudyIndex;
+        const heartIcon = document.getElementById("card-heart-icon");
+        if (!heartIcon || !words || !words[idx]) return;
+
+        const currentWord = words[idx];
+        const isFav = this.state.favorites.some(w => w.word.toLowerCase() === currentWord.word.toLowerCase());
+
+        if (isFav) {
+            heartIcon.className = "fa-solid fa-heart text-xl text-pink-500";
+        } else {
+            heartIcon.className = "fa-regular fa-heart text-xl text-slate-400";
+        }
+    },
+
+    switchBookmarkTab: function(tabName) {
+        this.state.activeBookmarkTab = tabName;
+        const tabFav = document.getElementById("tab-btn-favorites");
+        const tabUnmem = document.getElementById("tab-btn-unmemorized");
+
+        if (tabName === 'favorites') {
+            if (tabFav) tabFav.className = "py-2.5 px-4 font-bold text-sm border-b-2 border-pink-500 text-pink-500 transition";
+            if (tabUnmem) tabUnmem.className = "py-2.5 px-4 font-bold text-sm border-b-2 border-transparent typo-muted transition";
+        } else {
+            if (tabFav) tabFav.className = "py-2.5 px-4 font-bold text-sm border-b-2 border-transparent typo-muted transition";
+            if (tabUnmem) tabUnmem.className = "py-2.5 px-4 font-bold text-sm border-b-2 border-pink-500 text-pink-500 transition";
+        }
+        this.renderBookmarkWordsList();
+    },
+
+    renderBookmarkWordsList: function() {
+        const listEl = document.getElementById("bookmarks-words-list");
+        if (!listEl) return;
+
+        const words = this.state.activeBookmarkTab === 'favorites' ? this.state.favorites : this.state.unmemorized;
+
+        if (!words || words.length === 0) {
+            listEl.innerHTML = `
+                <div class="text-center py-10 space-y-2">
+                    <i class="fa-solid fa-heart-crack text-4xl text-pink-400"></i>
+                    <p class="typo-muted text-sm">${this.state.activeBookmarkTab === 'favorites' ? '중요 표시한 단어가 없습니다.' : '아직 헷갈리는 미암기 단어가 없습니다.'}</p>
+                </div>
+            `;
+            return;
+        }
+
+        listEl.innerHTML = words.map((w) => `
+            <div class="py-4 flex items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-bold tracking-wide">${this.escapeHtml(w.word)}</span>
+                        <span class="text-xs phonetic-text">${this.escapeHtml(w.phonetic || '')}</span>
+                        ${w.audio_url ? `<button onclick="app.playAudioUrl('${w.audio_url}', '${w.word}')" class="text-purple-500 hover:text-purple-400"><i class="fa-solid fa-volume-low"></i></button>` : ''}
+                    </div>
+                    <p class="text-xs font-bold text-pink-500 dark:text-pink-400">${this.escapeHtml(w.meaning)}</p>
+                    ${w.example_en ? `<p class="typo-muted italic text-xs">"${this.escapeHtml(w.example_en)}" - ${this.escapeHtml(w.example_kr || '')}</p>` : ''}
+                </div>
+                <button onclick="app.removeBookmarkWord('${this.escapeHtml(w.word)}', '${this.state.activeBookmarkTab}')" class="typo-muted hover:text-rose-500 transition p-2" title="목록에서 제거">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `).join('');
+    },
+
+    removeBookmarkWord: function(wordText, tabType) {
+        if (tabType === 'favorites') {
+            this.state.favorites = this.state.favorites.filter(w => w.word.toLowerCase() !== wordText.toLowerCase());
+        } else {
+            this.state.unmemorized = this.state.unmemorized.filter(w => w.word.toLowerCase() !== wordText.toLowerCase());
+        }
+        this.saveBookmarks();
+        this.renderBookmarkWordsList();
+        this.showToast(`'${wordText}' 단어를 목록에서 제거했습니다.`, "info");
+    },
+
+    startBookmarkStudy: function() {
+        const words = this.state.activeBookmarkTab === 'favorites' ? this.state.favorites : this.state.unmemorized;
+        if (!words || words.length === 0) {
+            this.showToast("복습할 단어가 목록에 없습니다.", "error");
+            return;
+        }
+        document.getElementById('study-set-title').textContent = this.state.activeBookmarkTab === 'favorites' ? "💖 중요 단어 복습 모드" : "❌ 헷갈리는 미암기 단어 모드";
+        document.getElementById('study-set-desc').textContent = "로그인 없이 내 기기에 저장된 나만의 단어들을 복습합니다.";
+        this.state.currentStudyWords = [...words];
+        this.state.currentStudyIndex = 0;
+        this.state.isFlipped = false;
+        this.navigateTo('study');
+        this.renderCurrentCard();
+    },
+
+    startBookmarkQuiz: function() {
+        const words = this.state.activeBookmarkTab === 'favorites' ? this.state.favorites : this.state.unmemorized;
+        if (!words || words.length < 2) {
+            this.showToast("퀴즈 진행을 위해 최소 2개 이상의 복습 단어가 필요합니다.", "error");
+            return;
+        }
+        this.state.quizQuestions = [...words].sort(() => 0.5 - Math.random());
+        this.state.quizCurrentIndex = 0;
+        this.state.quizScore = 0;
+        this.state.quizWrongWords = [];
+        this.navigateTo('quiz');
+        document.getElementById('quiz-setup-card').classList.add('hidden');
+        document.getElementById('quiz-result-card').classList.add('hidden');
+        document.getElementById('quiz-active-card').classList.remove('hidden');
         this.renderQuizQuestion();
     },
 
