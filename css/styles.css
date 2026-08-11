@@ -231,3 +231,25 @@ input[type="text"], textarea, select {
     border-radius: 10px;
     opacity: 0.5;
 }
+
+/* 터치 스와이프 글로우 효과 (Swipe Right / Left) */
+.flip-card.swiping-right {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6) !important;
+}
+.flip-card.swiping-left {
+    box-shadow: 0 0 30px rgba(244, 63, 94, 0.6) !important;
+}
+
+/* 스트릭 및 업적 뱃지 애니메이션 */
+.streak-fire-anim {
+    animation: pulse-fire 1.5s infinite ease-in-out;
+}
+@keyframes pulse-fire {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px #F59E0B); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 8px #EF4444); }
+}
+
+/* 퀴즈 타임어택 바 프로그레스 */
+.timer-progress-bar {
+    transition: width 0.1s linear;
+}

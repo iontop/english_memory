@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="English Memory v0.3 - 소프트 파스텔 스터디 무드의 영단어 암기 & 테스트 웹플랫폼">
+    <meta name="description" content="English Memory v0.4 - PWA 지원 파스텔 영단어 암기 & 타임어택 퀴즈 웹플랫폼">
     <title>English Memory</title>
+    <link rel="manifest" href="manifest.json">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Pretendard & Inter Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css?v=0.3.0">
+    <link rel="stylesheet" href="css/styles.css?v=0.4.0">
 </head>
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
@@ -26,7 +27,7 @@
                     <h1 class="text-lg sm:text-xl font-extrabold tracking-tight font-heading">
                         English Memory
                     </h1>
-                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.3</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.4</span>
                 </div>
             </div>
 
@@ -50,8 +51,14 @@
                 </button>
             </nav>
 
-            <!-- Right Side Controls: Theme Switcher & Backend Status (Spacious Layout) -->
+            <!-- Right Side Controls: Streak, Theme Switcher & Backend Status -->
             <div class="flex items-center space-x-2 sm:space-x-3 shrink-0 ml-auto">
+                <!-- Streak Badge Button -->
+                <div id="streak-badge-btn" onclick="app.showAchievementsModal()" class="flex items-center space-x-1.5 glass-panel px-3 py-1.5 rounded-full text-xs font-bold cursor-pointer transition shadow-sm hover:border-amber-500/40 text-amber-500" title="연속 학습 스트릭 및 뱃지 업적 확인">
+                    <i class="fa-solid fa-fire streak-fire-anim"></i>
+                    <span id="streak-days-text">1일 연속</span>
+                </div>
+
                 <!-- Light / Dark Theme Toggle Button -->
                 <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="px-3 sm:px-3.5 py-1.5 rounded-full badge-soft text-xs font-bold transition flex items-center gap-1.5 shadow-sm hover:opacity-90 active:scale-95" title="다크 / 라이트 모드 테마 변경">
                     <span id="theme-toggle-icon">🌙</span>
@@ -161,6 +168,11 @@
                     <div id="flashcard-inner" class="flip-card-inner">
                         <!-- FRONT SIDE -->
                         <div class="flip-card-front">
+                            <!-- Audio Speed Toggle Button -->
+                            <button id="btn-audio-rate" onclick="event.stopPropagation(); app.toggleAudioRate();" class="absolute top-4 left-4 px-3 py-1 rounded-full glass-panel text-purple-600 dark:text-purple-400 font-extrabold text-xs hover:scale-105 transition shadow-sm" title="발음 배속 변경 (0.8x / 1.0x / 1.2x)">
+                                1.0x 🔊
+                            </button>
+
                             <!-- Bookmark Heart Button -->
                             <button id="btn-card-heart" onclick="event.stopPropagation(); app.toggleBookmarkCurrentWord();" class="absolute top-4 right-4 p-2.5 rounded-full glass-panel text-pink-500 hover:scale-110 transition shadow-md" title="중요 단어 북마크">
                                 <i id="card-heart-icon" class="fa-regular fa-heart text-xl"></i>
@@ -360,6 +372,22 @@
                             </label>
                         </div>
                     </div>
+
+                    <div>
+                        <label class="block typo-caption mb-2">3. 제한시간 모드 선택</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer border border-purple-500/20 glass-panel p-3.5 rounded-2xl flex items-center justify-center gap-2 hover:border-purple-500 transition has-[:checked]:border-purple-500 has-[:checked]:bg-purple-500/10">
+                                <input type="radio" name="quiz-timer-mode" value="none" checked class="hidden">
+                                <i class="fa-solid fa-clock text-purple-500 text-lg"></i>
+                                <span class="text-xs font-bold">시간 제한 없음</span>
+                            </label>
+                            <label class="cursor-pointer border border-purple-500/20 glass-panel p-3.5 rounded-2xl flex items-center justify-center gap-2 hover:border-purple-500 transition has-[:checked]:border-purple-500 has-[:checked]:bg-purple-500/10">
+                                <input type="radio" name="quiz-timer-mode" value="timeattack" class="hidden">
+                                <i class="fa-solid fa-bolt text-amber-500 text-lg"></i>
+                                <span class="text-xs font-bold">⚡ 5초 타임어택</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <button onclick="app.startQuiz()" class="w-full py-4 rounded-2xl btn-primary text-white font-extrabold text-base shadow-lg transition active:scale-95">
@@ -449,11 +477,35 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Achievements & Polar Bear Badges Modal -->
+    <div id="modal-achievements" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-purple-500/20 pb-3">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-500"></i>
+                    <span>북극곰 업적 & 뱃지 🏆</span>
+                </h3>
+                <button onclick="app.closeAchievementsModal()" class="opacity-60 hover:opacity-100"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="achievements-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <button onclick="app.closeAchievementsModal()" class="w-full py-3 rounded-2xl btn-primary text-white font-bold text-xs shadow-md transition">
+                확인 및 닫기
+            </button>
+        </div>
+    </div>
+
     <!-- Persistent DOM Audio Player for Mobile Safari / Chrome Compatibility -->
     <audio id="app-audio-player" playsinline preload="auto" class="hidden"></audio>
 
     <!-- JS Scripts -->
-    <script src="js/config.js?v=0.3.0"></script>
-    <script src="js/app.js?v=0.3.0"></script>
+    <script src="js/config.js?v=0.4.0"></script>
+    <script src="js/db.js?v=0.4.0"></script>
+    <script src="js/app.js?v=0.4.0"></script>
 </body>
 </html>

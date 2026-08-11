@@ -100,6 +100,13 @@ const app = {
         // Manager State
         managerSetId: null,
 
+        // Audio Rate & Gamification State (v0.4.0)
+        audioRate: 1.0,
+        streakDays: 1,
+        quizTimerMode: 'none',
+        quizTimerId: null,
+        quizTimerSecondsLeft: 5,
+
         // Quiz State
         quizSetId: null,
         quizType: 'multiple',
@@ -111,13 +118,25 @@ const app = {
     },
 
     init: function() {
-        console.log("Initializing English Memory App with API:", API_BASE_URL);
+        console.log("Initializing English Memory App v0.4.0 with API:", API_BASE_URL);
         this.initTheme();
         this.initMobileAudioUnlock();
         this.initBookmarks();
-        this.loadWordSets(); // Immediately load presets so UI renders with 0ms delay!
+        this.initStreakAndSRS();
+        this.initSwipeGestures();
+        this.registerServiceWorker();
+        this.loadWordSets();
         this.checkServerHealth();
         this.bindKeyboardShortcuts();
+    },
+
+    registerServiceWorker: function() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js?v=0.4.0').catch(() => {});
+        }
+        if (window.IndexedDBEngine) {
+            window.IndexedDBEngine.init();
+        }
     },
 
     initTheme: function() {
@@ -253,6 +272,133 @@ const app = {
             document.getElementById('quiz-active-card').classList.add('hidden');
             document.getElementById('quiz-result-card').classList.add('hidden');
         }
+    },
+
+    initStreakAndSRS: function() {
+        const today = new Date().toISOString().split('T')[0];
+        const lastDate = localStorage.getItem("USER_LAST_STUDY_DATE");
+        let streak = parseInt(localStorage.getItem("USER_STREAK_COUNT") || "1", 10);
+
+        if (lastDate) {
+            const last = new Date(lastDate);
+            const now = new Date(today);
+            const diffDays = Math.round((now - last) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                streak += 1;
+                localStorage.setItem("USER_STREAK_COUNT", streak.toString());
+            } else if (diffDays > 1) {
+                streak = 1;
+                localStorage.setItem("USER_STREAK_COUNT", "1");
+            }
+        } else {
+            streak = 1;
+            localStorage.setItem("USER_STREAK_COUNT", "1");
+        }
+
+        localStorage.setItem("USER_LAST_STUDY_DATE", today);
+        this.state.streakDays = streak;
+
+        const streakEl = document.getElementById('streak-days-text');
+        if (streakEl) streakEl.textContent = `${streak}일 연속`;
+    },
+
+    initSwipeGestures: function() {
+        const card = document.getElementById('flashcard');
+        if (!card) return;
+
+        let startX = 0;
+        let currentX = 0;
+        let isSwiping = false;
+
+        card.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1) return;
+            startX = e.touches[0].clientX;
+            isSwiping = true;
+        }, { passive: true });
+
+        card.addEventListener('touchmove', (e) => {
+            if (!isSwiping) return;
+            currentX = e.touches[0].clientX - startX;
+            if (Math.abs(currentX) > 10) {
+                card.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.05}deg)`;
+                if (currentX > 50) {
+                    card.classList.add('swiping-right');
+                    card.classList.remove('swiping-left');
+                } else if (currentX < -50) {
+                    card.classList.add('swiping-left');
+                    card.classList.remove('swiping-right');
+                } else {
+                    card.classList.remove('swiping-right', 'swiping-left');
+                }
+            }
+        }, { passive: true });
+
+        card.addEventListener('touchend', () => {
+            if (!isSwiping) return;
+            isSwiping = false;
+            card.classList.remove('swiping-right', 'swiping-left');
+            card.style.transform = '';
+
+            if (currentX > 70) {
+                this.markCurrentWordStatus(true);
+            } else if (currentX < -70) {
+                this.markCurrentWordStatus(false);
+            }
+            currentX = 0;
+        }, { passive: true });
+    },
+
+    toggleAudioRate: function() {
+        const rates = [0.8, 1.0, 1.2];
+        const currentIdx = rates.indexOf(this.state.audioRate);
+        const nextRate = rates[(currentIdx + 1) % rates.length];
+        this.state.audioRate = nextRate;
+
+        const btn = document.getElementById('btn-audio-rate');
+        if (btn) btn.textContent = `${nextRate.toFixed(1)}x 🔊`;
+        this.showToast(`발음 속도가 ${nextRate.toFixed(1)}x 로 변경되었습니다.`, "info");
+    },
+
+    showAchievementsModal: function() {
+        const modal = document.getElementById('modal-achievements');
+        const list = document.getElementById('achievements-list');
+        if (!modal || !list) return;
+
+        const streak = this.state.streakDays || 1;
+        const favCount = (this.state.favorites || []).length;
+        const unmemCount = (this.state.unmemorized || []).length;
+        const totalStudied = favCount + unmemCount;
+
+        const badges = [
+            { icon: "🐾", title: "새싹 북극곰", desc: "첫 단어 학습을 시작함", unlocked: true },
+            { icon: "📚", title: "열공 북극곰", desc: "복습/중요 단어 5개 이상 수집", unlocked: totalStudied >= 5 },
+            { icon: "🔥", title: "열정 북극곰", desc: "3일 이상 연속 출석 달성", unlocked: streak >= 3 },
+            { icon: "⚡", title: "타임어택 북극곰", desc: "5초 타임어택 퀴즈 도전 완료", unlocked: true },
+            { icon: "👑", title: "왕관 북극곰", desc: "복습 단어 20개 완료 마스터", unlocked: totalStudied >= 20 }
+        ];
+
+        list.innerHTML = badges.map(b => `
+            <div class="p-3.5 rounded-2xl border ${b.unlocked ? 'border-amber-500/40 bg-amber-500/10' : 'border-purple-500/20 glass-panel opacity-50'} flex items-center justify-between transition">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${b.icon}</span>
+                    <div class="text-left">
+                        <h4 class="font-bold text-xs ${b.unlocked ? 'text-amber-600 dark:text-amber-400' : 'typo-muted'}">${b.title}</h4>
+                        <p class="typo-muted text-[11px]">${b.desc}</p>
+                    </div>
+                </div>
+                <span class="text-xs font-extrabold px-2.5 py-1 rounded-full ${b.unlocked ? 'bg-amber-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'}">
+                    ${b.unlocked ? '달성 완료 🎉' : '미달성'}
+                </span>
+            </div>
+        `).join('');
+
+        modal.classList.remove('hidden');
+    },
+
+    closeAchievementsModal: function() {
+        const modal = document.getElementById('modal-achievements');
+        if (modal) modal.classList.add('hidden');
     },
 
     showToast: function(message, type = 'info') {
@@ -875,6 +1021,8 @@ const app = {
     // ------------------ QUIZ ENGINE & TESTING SUITE ------------------
     startQuiz: async function() {
         const selectedType = document.querySelector('input[name="quiz-type"]:checked').value;
+        const timerModeEl = document.querySelector('input[name="quiz-timer-mode"]:checked');
+        const selectedTimerMode = timerModeEl ? timerModeEl.value : 'none';
         const setId = this.state.quizSetId;
 
         if (!setId) {
@@ -900,6 +1048,7 @@ const app = {
         }
 
         this.state.quizType = selectedType;
+        this.state.quizTimerMode = selectedTimerMode;
         this.state.quizQuestions = [...words].sort(() => 0.5 - Math.random());
         this.state.quizCurrentIndex = 0;
         this.state.quizScore = 0;
@@ -910,6 +1059,28 @@ const app = {
         document.getElementById('quiz-active-card').classList.remove('hidden');
 
         this.renderQuizQuestion();
+    },
+
+    stopQuizTimer: function() {
+        if (this.state.quizTimerId) {
+            clearInterval(this.state.quizTimerId);
+            this.state.quizTimerId = null;
+        }
+    },
+
+    startQuizTimer: function() {
+        this.stopQuizTimer();
+        if (this.state.quizTimerMode !== 'timeattack') return;
+
+        let leftMs = 5000;
+        this.state.quizTimerId = setInterval(() => {
+            leftMs -= 100;
+            if (leftMs <= 0) {
+                this.stopQuizTimer();
+                this.showToast("⏱️ 시간 초과!", "error");
+                this.nextQuizQuestion(false);
+            }
+        }, 100);
     },
 
     renderQuizQuestion: function() {
@@ -964,6 +1135,8 @@ const app = {
                 </div>
             `;
         }
+
+        this.startQuizTimer();
     },
 
     selectQuizOption: function(btnEl, meaningVal) {
@@ -982,6 +1155,7 @@ const app = {
     },
 
     submitQuizAnswer: function() {
+        this.stopQuizTimer();
         const q = this.state.quizQuestions[this.state.quizCurrentIndex];
         const type = this.state.quizType;
         let isCorrect = false;
