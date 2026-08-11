@@ -277,7 +277,7 @@ const app = {
             <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between hover:border-purple-500/50 transition-all duration-300 shadow-xl group">
                 <div class="space-y-3">
                     <div class="flex items-start justify-between gap-2">
-                        <h3 class="text-base font-bold transition font-heading">${this.escapeHtml(set.title)}</h3>
+                        <h3 class="text-base font-bold transition font-heading" style="color: var(--text-main);">${this.escapeHtml(set.title)}</h3>
                         <span class="text-xs px-2.5 py-1 rounded-full badge-soft font-bold shrink-0">
                             ${set.word_count || 30} 단어
                         </span>
@@ -295,7 +295,7 @@ const app = {
                         </button>
                     </div>
                     <div class="flex items-center justify-between typo-muted pt-1">
-                        <span><i class="fa-regular fa-clock mr-1"></i>입시 단어장</span>
+                        <span><i class="fa-regular fa-clock mr-1"></i>단어장</span>
                         <button onclick="app.deleteSet(${set.id}, '${this.escapeHtml(set.title)}')" class="hover:text-rose-500 transition" title="단어장 삭제">
                             <i class="fa-solid fa-trash-can"></i> 삭제
                         </button>
