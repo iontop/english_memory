@@ -10,7 +10,7 @@
     <!-- Font Awesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Pretendard & Inter Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css?v=0.2.1">
+    <link rel="stylesheet" href="css/styles.css?v=0.2.2">
 </head>
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
@@ -278,27 +278,29 @@
                 </h2>
                 <p class="typo-muted">네이버 사전 데이터베이스에서 단어 뜻, 발음기호, MP3 음성, 예문을 자동 수집합니다.</p>
 
-                <!-- Form -->
-                <form onsubmit="app.handleAutoAddWord(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
-                    <div class="sm:col-span-4">
-                        <label class="block typo-caption mb-1">등록할 단어장 세트</label>
-                        <select id="manager-set-select" onchange="app.loadManagerSetWords(this.value)" class="w-full text-xs rounded-2xl px-3.5 py-3 focus:outline-none">
-                            <!-- Options -->
-                        </select>
+                <!-- Modern Interactive Card Grid Selection & Form -->
+                <div class="space-y-4 pt-2">
+                    <div>
+                        <label class="block typo-caption mb-2">1. 수집/등록할 단어장 선택 (터치하여 선택)</label>
+                        <div id="manager-set-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[260px] overflow-y-auto pr-1">
+                            <!-- Rendered dynamically via JS -->
+                        </div>
                     </div>
 
-                    <div class="sm:col-span-5">
-                        <label class="block typo-caption mb-1">수집할 영단어 (English Word)</label>
-                        <input type="text" id="input-word-text" placeholder="예: resilient, ephemeral, meticulous" required autocomplete="off" class="w-full text-sm rounded-2xl px-4 py-2.5 focus:outline-none">
-                    </div>
+                    <form onsubmit="app.handleAutoAddWord(event)" class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <div class="flex-grow">
+                            <label class="block typo-caption mb-1">2. 수집할 영단어 (English Word)</label>
+                            <input type="text" id="input-word-text" placeholder="예: resilient, ephemeral, meticulous" required autocomplete="off" class="w-full text-sm rounded-2xl px-4 py-3 focus:outline-none">
+                        </div>
 
-                    <div class="sm:col-span-3 flex items-end">
-                        <button type="submit" id="btn-auto-add" class="w-full py-2.5 px-4 rounded-2xl btn-primary text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-md">
-                            <span id="spinner-auto-add" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
-                            <i class="fa-solid fa-sparkles"></i>자동 수집 & 추가
-                        </button>
-                    </div>
-                </form>
+                        <div class="flex items-end">
+                            <button type="submit" id="btn-auto-add" class="w-full sm:w-auto py-3 px-6 rounded-2xl btn-primary text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shrink-0">
+                                <span id="spinner-auto-add" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
+                                <i class="fa-solid fa-sparkles"></i>자동 수집 & 추가
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <!-- Words List in Selected Set -->
@@ -451,7 +453,7 @@
     <audio id="app-audio-player" playsinline preload="auto" class="hidden"></audio>
 
     <!-- JS Scripts -->
-    <script src="js/config.js?v=0.2.1"></script>
-    <script src="js/app.js?v=0.2.1"></script>
+    <script src="js/config.js?v=0.2.2"></script>
+    <script src="js/app.js?v=0.2.2"></script>
 </body>
 </html>

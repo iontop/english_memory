@@ -97,6 +97,9 @@ const app = {
         unmemorized: [],
         activeBookmarkTab: 'favorites',
 
+        // Manager State
+        managerSetId: null,
+
         // Quiz State
         quizSetId: null,
         quizType: 'multiple',
@@ -237,10 +240,12 @@ const app = {
         } else if (viewName === 'bookmarks') {
             this.renderBookmarkWordsList();
         } else if (viewName === 'manager') {
-            this.populateSetDropdowns();
-            const managerSelect = document.getElementById('manager-set-select');
-            if (managerSelect && managerSelect.value) {
-                this.loadManagerSetWords(managerSelect.value);
+            this.renderManagerSetCardsGrid();
+            if (!this.state.managerSetId && (this.state.wordSets.length > 0 || PRESET_WORD_SETS.length > 0)) {
+                this.state.managerSetId = this.state.wordSets.length > 0 ? this.state.wordSets[0].id : PRESET_WORD_SETS[0].id;
+            }
+            if (this.state.managerSetId) {
+                this.loadManagerSetWords(this.state.managerSetId);
             }
         } else if (viewName === 'quiz') {
             this.renderQuizSetCardsGrid();
@@ -429,6 +434,45 @@ const app = {
     selectQuizSetCard: function(setId) {
         this.state.quizSetId = setId;
         this.renderQuizSetCardsGrid();
+    },
+
+    renderManagerSetCardsGrid: function() {
+        const grid = document.getElementById('manager-set-cards-grid');
+        if (!grid) return;
+
+        const sets = (this.state.wordSets && this.state.wordSets.length > 0) ? this.state.wordSets : PRESET_WORD_SETS;
+        
+        if (!this.state.managerSetId && sets.length > 0) {
+            this.state.managerSetId = sets[0].id;
+        }
+
+        const html = sets.map(set => {
+            const isSelected = this.state.managerSetId == set.id;
+            return `
+                <div onclick="app.selectManagerSetCard('${set.id}')" class="cursor-pointer p-3.5 rounded-2xl border ${isSelected ? 'border-purple-500 bg-purple-500/10 shadow-md' : 'border-purple-500/20 glass-panel'} flex items-center justify-between transition-all active:scale-95">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-extrabold text-sm shrink-0">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <h4 class="font-bold text-xs truncate">${this.escapeHtml(set.title)}</h4>
+                            <p class="typo-muted text-[11px]">${set.word_count || (set.words ? set.words.length : 30)}단어</p>
+                        </div>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-300 dark:border-slate-600'} flex items-center justify-center text-[10px] shrink-0">
+                        ${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        grid.innerHTML = html;
+    },
+
+    selectManagerSetCard: function(setId) {
+        this.state.managerSetId = setId;
+        this.renderManagerSetCardsGrid();
+        this.loadManagerSetWords(setId);
     },
 
     openCreateSetModal: function() {
@@ -707,12 +751,11 @@ const app = {
 
     handleAutoAddWord: async function(e) {
         e.preventDefault();
-        const setSelect = document.getElementById('manager-set-select');
         const wordInput = document.getElementById('input-word-text');
         const spinner = document.getElementById('spinner-auto-add');
         const btn = document.getElementById('btn-auto-add');
 
-        const setId = setSelect.value;
+        const setId = this.state.managerSetId;
         const word = wordInput.value.trim();
 
         if (!setId || !word) {
