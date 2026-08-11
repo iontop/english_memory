@@ -154,16 +154,41 @@ const app = {
 
     // ------------------ WORD SETS MANAGEMENT ------------------
     loadWordSets: async function() {
+        // 1. Mobile Optimistic Render: Load from local cache immediately (0ms delay)
+        const cachedSetsStr = localStorage.getItem("CACHE_WORD_SETS");
+        if (cachedSetsStr) {
+            try {
+                const cachedSets = JSON.parse(cachedSetsStr);
+                this.state.wordSets = cachedSets;
+                this.renderWordSetsGrid(cachedSets);
+                this.populateSetDropdowns();
+            } catch (e) {
+                console.warn("Cached sets parse error", e);
+            }
+        }
+
+        // 2. Fetch fresh data from Render backend with 10s AbortController timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         try {
-            const res = await fetch(`${API_BASE_URL}/sets`);
+            const res = await fetch(`${API_BASE_URL}/sets`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             if (!res.ok) throw new Error("단어 세트 목록 로드 실패");
             const sets = await res.json();
+            
+            // Update state & update local cache
             this.state.wordSets = sets;
+            localStorage.setItem("CACHE_WORD_SETS", JSON.stringify(sets));
             this.renderWordSetsGrid(sets);
             this.populateSetDropdowns();
         } catch (err) {
-            console.error(err);
-            this.showToast("단어장 세트를 불러오지 못했습니다.", "error");
+            clearTimeout(timeoutId);
+            console.warn("Fetch word sets notice:", err);
+            // If we don't have any cached data, notify user gently
+            if (!cachedSetsStr) {
+                this.showToast("서버 연결 중... 잠시 후 자동으로 로드됩니다.", "info");
+            }
         }
     },
 
@@ -297,11 +322,35 @@ const app = {
     loadStudySet: async function(setId) {
         if (!setId) return;
         this.state.currentStudySetId = setId;
+
+        // 1. Mobile Optimistic Render from Local Cache
+        const cacheKey = `CACHE_SET_${setId}`;
+        const cachedDataStr = localStorage.getItem(cacheKey);
+        if (cachedDataStr) {
+            try {
+                const cachedData = JSON.parse(cachedDataStr);
+                document.getElementById('study-set-title').textContent = cachedData.title;
+                document.getElementById('study-set-desc').textContent = cachedData.description || "플래시카드를 클릭하여 한글 뜻을 확인하세요.";
+                this.state.currentStudyWords = cachedData.words || [];
+                this.state.currentStudyIndex = 0;
+                this.state.isFlipped = false;
+                this.renderCurrentCard();
+            } catch (e) {
+                console.warn("Cached set words parse error", e);
+            }
+        }
+
+        // 2. Fetch fresh data from backend with AbortController
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         try {
-            const res = await fetch(`${API_BASE_URL}/sets/${setId}/words`);
+            const res = await fetch(`${API_BASE_URL}/sets/${setId}/words`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             if (!res.ok) throw new Error("단어 목록 조회 실패");
             const data = await res.json();
-            
+
+            localStorage.setItem(cacheKey, JSON.stringify(data));
             document.getElementById('study-set-title').textContent = data.title;
             document.getElementById('study-set-desc').textContent = data.description || "플래시카드를 클릭하여 한글 뜻을 확인하세요.";
             
@@ -311,7 +360,11 @@ const app = {
             
             this.renderCurrentCard();
         } catch (err) {
-            this.showToast("학습 단어를 불러오지 못했습니다.", "error");
+            clearTimeout(timeoutId);
+            console.warn("Fetch set words notice:", err);
+            if (!cachedDataStr) {
+                this.showToast("학습 단어를 로딩 중입니다...", "info");
+            }
         }
     },
 
