@@ -274,27 +274,27 @@ const app = {
         }
 
         grid.innerHTML = sets.map(set => `
-            <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between hover:border-pink-500/50 transition-all duration-300 shadow-xl group">
+            <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between hover:border-purple-500/50 transition-all duration-300 shadow-xl group">
                 <div class="space-y-3">
                     <div class="flex items-start justify-between gap-2">
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-300 transition font-heading">${this.escapeHtml(set.title)}</h3>
-                        <span class="text-xs px-2.5 py-1 rounded-full badge-pastel-pink font-bold shrink-0">
+                        <h3 class="text-base font-bold transition font-heading">${this.escapeHtml(set.title)}</h3>
+                        <span class="text-xs px-2.5 py-1 rounded-full badge-soft font-bold shrink-0">
                             ${set.word_count || 30} 단어
                         </span>
                     </div>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 font-medium line-clamp-2">${this.escapeHtml(set.description || "대학입시 수능 필수 단어 모음집")}</p>
+                    <p class="typo-muted line-clamp-2">${this.escapeHtml(set.description || "대학입시 수능 필수 단어 모음집")}</p>
                 </div>
 
                 <div class="pt-6 space-y-3">
                     <div class="flex gap-2">
-                        <button onclick="app.selectSetAndStudy(${set.id})" class="flex-1 py-2.5 rounded-2xl btn-cute-pink text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
+                        <button onclick="app.selectSetAndStudy(${set.id})" class="flex-1 py-2.5 rounded-2xl btn-primary text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-play"></i> 학습 시작
                         </button>
-                        <button onclick="app.selectSetAndQuiz(${set.id})" class="flex-1 py-2.5 rounded-2xl bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/60 dark:hover:bg-purple-900/80 text-purple-700 dark:text-pink-300 border border-purple-200 dark:border-purple-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-gamepad"></i> 테스트
+                        <button onclick="app.selectSetAndQuiz(${set.id})" class="flex-1 py-2.5 rounded-2xl glass-panel text-xs font-bold transition flex items-center justify-center gap-1.5 hover:bg-purple-500/10">
+                            <i class="fa-solid fa-gamepad text-pink-500"></i> 테스트
                         </button>
                     </div>
-                    <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium pt-1">
+                    <div class="flex items-center justify-between typo-muted pt-1">
                         <span><i class="fa-regular fa-clock mr-1"></i>입시 단어장</span>
                         <button onclick="app.deleteSet(${set.id}, '${this.escapeHtml(set.title)}')" class="hover:text-rose-500 transition" title="단어장 삭제">
                             <i class="fa-solid fa-trash-can"></i> 삭제
@@ -576,14 +576,14 @@ const app = {
             <div class="py-4 flex items-center justify-between gap-4">
                 <div class="space-y-1">
                     <div class="flex items-center gap-2">
-                        <span class="text-base font-bold text-white font-heading">${this.escapeHtml(w.word)}</span>
-                        <span class="text-xs font-mono text-purple-300">${this.escapeHtml(w.phonetic || '')}</span>
-                        ${w.audio_url ? `<button onclick="app.playAudioUrl('${w.audio_url}', '${w.word}')" class="text-pink-400 hover:text-pink-300"><i class="fa-solid fa-volume-low"></i></button>` : ''}
+                        <span class="text-base font-bold tracking-wide">${this.escapeHtml(w.word)}</span>
+                        <span class="text-xs phonetic-text">${this.escapeHtml(w.phonetic || '')}</span>
+                        ${w.audio_url ? `<button onclick="app.playAudioUrl('${w.audio_url}', '${w.word}')" class="text-purple-500 hover:text-purple-400"><i class="fa-solid fa-volume-low"></i></button>` : ''}
                     </div>
-                    <p class="text-xs text-pink-300 font-bold">${this.escapeHtml(w.meaning)}</p>
-                    ${w.example_en ? `<p class="text-xs text-slate-400 italic">"${this.escapeHtml(w.example_en)}" - ${this.escapeHtml(w.example_kr || '')}</p>` : ''}
+                    <p class="text-xs font-bold text-pink-500 dark:text-pink-400">${this.escapeHtml(w.meaning)}</p>
+                    ${w.example_en ? `<p class="typo-muted italic">"${this.escapeHtml(w.example_en)}" - ${this.escapeHtml(w.example_kr || '')}</p>` : ''}
                 </div>
-                <button onclick="app.removeWordFromSet(${setId}, ${w.id}, '${this.escapeHtml(w.word)}')" class="text-slate-500 hover:text-rose-400 transition p-2" title="세트에서 제외">
+                <button onclick="app.removeWordFromSet(${setId}, ${w.id}, '${this.escapeHtml(w.word)}')" class="typo-muted hover:text-rose-500 transition p-2" title="세트에서 제외">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>

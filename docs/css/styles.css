@@ -1,166 +1,140 @@
-/* 💖 Global Pastel & Maximum Readability Contrast Design System 💖 */
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+/* 🌸 'Soft Pastel Study' Design System - 10대 여학생 맞춤형 UI/UX 🌸 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --font-heading: 'Fredoka', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    --font-phonetic: "Inter", "Pretendard", "Lucida Sans Unicode", "Segoe UI", sans-serif;
     
-    /* Ethereal Light Theme - Maximum Readability & High Contrast (Default) */
-    --bg-gradient: linear-gradient(135deg, #fff5f8 0%, #f3e8ff 50%, #e0f2fe 100%);
-    --panel-bg: #ffffff;
-    --panel-border: rgba(236, 72, 153, 0.25);
-    --panel-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+    /* 1. 라이트 모드 (Light Mode HEX Codes) */
+    --bg-main: #F5F3FF;         /* Soft Lavender 배경 */
+    --card-bg: #FFFFFF;         /* Pure White 카드 및 모달 */
+    --text-main: #1E1B4B;       /* Deep Navy Violet (7:1 이상 최고 가독성) */
+    --text-muted: #6B7280;      /* Slate Gray */
+    --primary-brand: #A855F7;   /* Bright Purple */
+    --secondary-point: #EC4899; /* Soft Pink */
+    --color-success: #10B981;   /* Mint Green */
+    --color-danger: #F43F5E;    /* Rose Pink */
     
-    --nav-bg: rgba(255, 255, 255, 0.95);
-    --nav-border: rgba(236, 72, 153, 0.2);
-    
-    --text-primary: #0f172a;    /* Crisp Dark Slate (15:1 AAA Contrast) */
-    --text-secondary: #334155;  /* Deep Slate Gray */
-    --text-muted: #475569;      /* Dark Neutral Gray */
-    
-    --card-front-bg: #ffffff;
-    --card-front-border: #ec4899;
-    --card-back-bg: #faf5ff;
-    --card-back-border: #a855f7;
-    
-    --btn-pink: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
-    --btn-pink-shadow: 0 8px 20px -4px rgba(219, 39, 119, 0.35);
-    --btn-purple: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    --btn-purple-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.35);
-    
-    --input-bg: #ffffff;
-    --input-border: #cbd5e1;
-    --input-text: #0f172a;
+    --card-border: rgba(168, 85, 247, 0.2);
+    --card-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.04);
+    --input-bg: #FFFFFF;
+    --input-border: #E5E7EB;
 }
 
-/* Dark Mode - Deep Pastel High Contrast Palette */
+/* 2. 다크 모드 (Dark Mode HEX Codes) */
 html.dark {
-    --bg-gradient: radial-gradient(circle at 15% 15%, #231640 0%, #110d24 50%, #090714 100%);
-    --panel-bg: #1e1838;
-    --panel-border: rgba(236, 72, 153, 0.3);
-    --panel-shadow: 0 12px 40px 0 rgba(168, 85, 247, 0.25);
+    --bg-main: #0F0C1B;         /* Deep Night Purple 배경 */
+    --card-bg: #1E1A34;         /* Midnight Slate 카드 및 모달 */
+    --text-main: #F3E8FF;       /* Soft White-Violet */
+    --text-muted: #9CA3AF;      /* Cool Gray */
+    --primary-brand: #C084FC;   /* Pastel Purple */
+    --secondary-point: #F472B6; /* Pastel Pink */
+    --color-success: #34D399;   /* Light Mint */
+    --color-danger: #FB7185;    /* Light Rose */
     
-    --nav-bg: rgba(17, 13, 36, 0.94);
-    --nav-border: rgba(236, 72, 153, 0.25);
-    
-    --text-primary: #ffffff;    /* Pure White */
-    --text-secondary: #f1f5f9;  /* Light Slate */
-    --text-muted: #cbd5e1;      /* Bright Gray */
-    
-    --card-front-bg: linear-gradient(145deg, #2b1d4c 0%, #17102e 100%);
-    --card-front-border: rgba(236, 72, 153, 0.5);
-    --card-back-bg: linear-gradient(145deg, #421c4b 0%, #261136 100%);
-    --card-back-border: rgba(192, 132, 252, 0.5);
-    
-    --btn-pink: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-    --btn-pink-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.5);
-    --btn-purple: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
-    --btn-purple-shadow: 0 10px 20px -5px rgba(129, 140, 248, 0.5);
-    
-    --input-bg: #120e26;
-    --input-border: rgba(168, 85, 247, 0.4);
-    --input-text: #ffffff;
+    --card-border: rgba(192, 132, 252, 0.25);
+    --card-shadow: 0 12px 35px 0 rgba(15, 12, 27, 0.5);
+    --input-bg: #141026;
+    --input-border: rgba(192, 132, 252, 0.3);
 }
 
 body {
     font-family: var(--font-body);
-    background: var(--bg-gradient);
-    color: var(--text-primary);
+    background-color: var(--bg-main);
+    color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ---------------- STRICT FONT HIERARCHY SYSTEM ---------------- */
+/* 발음기호(IPA) 전용 폰트 폴백 설정 */
+.phonetic-text {
+    font-family: var(--font-phonetic);
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+/* ---------------- 타이포그래피 위계 (Typographic Hierarchy) ---------------- */
 h1, .typo-h1 {
-    font-family: var(--font-heading);
     font-size: 2.25rem; /* 36px */
     font-weight: 800;
     line-height: 1.25;
-    letter-spacing: -0.025em;
-    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    color: var(--text-main);
 }
 
 h2, .typo-h2 {
-    font-family: var(--font-heading);
     font-size: 1.5rem; /* 24px */
     font-weight: 700;
     line-height: 1.35;
-    color: var(--text-primary);
+    color: var(--text-main);
 }
 
 h3, .typo-h3 {
-    font-family: var(--font-heading);
     font-size: 1.125rem; /* 18px */
     font-weight: 600;
     line-height: 1.4;
-    color: var(--text-primary);
+    color: var(--text-main);
 }
 
 .typo-body {
     font-size: 0.875rem; /* 14px */
     font-weight: 400;
     line-height: 1.6;
-    color: var(--text-secondary);
+    color: var(--text-main);
 }
 
-.typo-caption {
+.typo-muted {
     font-size: 0.75rem; /* 12px */
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-weight: 500;
     color: var(--text-muted);
 }
 
-/* Glassmorphic Cards & Panels */
+/* 컨테이너 & 카드 패널 */
 .glass-panel {
-    background: var(--panel-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--panel-border);
-    box-shadow: var(--panel-shadow);
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    border-radius: 1.5rem;
 }
 
 .glass-nav {
-    background: var(--nav-bg);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--nav-border);
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
 }
 
-/* Form Controls with High Contrast */
+/* 폼 컨트롤 */
 input[type="text"], textarea, select {
     background-color: var(--input-bg) !important;
-    color: var(--input-text) !important;
+    color: var(--text-main) !important;
     border-color: var(--input-border) !important;
 }
 
-/* Custom Buttons */
-.btn-cute-pink {
-    background: var(--btn-pink);
-    color: #ffffff !important;
-    box-shadow: var(--btn-pink-shadow);
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* 브랜드 / 포인트 버튼 */
+.btn-primary {
+    background-color: var(--primary-brand);
+    color: #FFFFFF !important;
+    transition: all 0.2s ease-in-out;
 }
 
-.btn-cute-pink:hover {
-    transform: translateY(-2px) scale(1.02);
+.btn-primary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
 }
 
-.btn-cute-pink:active {
-    transform: translateY(1px) scale(0.98);
+.btn-secondary {
+    background-color: var(--secondary-point);
+    color: #FFFFFF !important;
+    transition: all 0.2s ease-in-out;
 }
 
-.btn-cute-purple {
-    background: var(--btn-purple);
-    color: #ffffff !important;
-    box-shadow: var(--btn-purple-shadow);
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+.btn-secondary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
 }
 
-.btn-cute-purple:hover {
-    transform: translateY(-2px) scale(1.02);
-}
-
-/* 3D Flashcard Bouncy Flip */
+/* 3D 플래시카드 플립 애니메이션 */
 .perspective-1000 {
     perspective: 1000px;
 }
@@ -192,47 +166,33 @@ input[type="text"], textarea, select {
     height: 100%;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    border-radius: 2rem;
+    border-radius: 1.5rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 2.25rem;
-    box-shadow: var(--panel-shadow);
+    box-shadow: var(--card-shadow);
 }
 
 .flip-card-front {
-    background: var(--card-front-bg);
-    border: 2px solid var(--card-front-border);
+    background-color: var(--card-bg);
+    border: 2px solid var(--primary-brand);
 }
 
 .flip-card-back {
-    background: var(--card-back-bg);
-    border: 2px solid var(--card-back-border);
+    background-color: var(--card-bg);
+    border: 2px solid var(--secondary-point);
     transform: rotateY(180deg);
 }
 
-.audio-btn {
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+.badge-soft {
+    background-color: rgba(168, 85, 247, 0.12);
+    color: var(--primary-brand);
+    border: 1px solid rgba(168, 85, 247, 0.25);
 }
 
-.audio-btn:hover {
-    transform: scale(1.15) rotate(-5deg);
-}
-
-.badge-pastel-pink {
-    background: rgba(236, 72, 153, 0.15);
-    color: #db2777;
-    border: 1px solid rgba(236, 72, 153, 0.3);
-}
-
-html.dark .badge-pastel-pink {
-    background: rgba(236, 72, 153, 0.2);
-    color: #f472b6;
-    border: 1px solid rgba(236, 72, 153, 0.4);
-}
-
-/* Custom Scrollbars */
+/* 커스텀 스크롤바 */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -241,9 +201,7 @@ html.dark .badge-pastel-pink {
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(236, 72, 153, 0.3);
+    background: var(--primary-brand);
     border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(236, 72, 153, 0.6);
+    opacity: 0.5;
 }
