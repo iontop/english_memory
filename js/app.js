@@ -243,7 +243,7 @@ const app = {
                 this.loadManagerSetWords(managerSelect.value);
             }
         } else if (viewName === 'quiz') {
-            this.populateSetDropdowns();
+            this.renderQuizSetCardsGrid();
             document.getElementById('quiz-setup-card').classList.remove('hidden');
             document.getElementById('quiz-active-card').classList.add('hidden');
             document.getElementById('quiz-result-card').classList.add('hidden');
@@ -350,7 +350,7 @@ const app = {
     },
 
     populateSetDropdowns: function() {
-        const dropdowns = ['study-set-select', 'manager-set-select', 'quiz-set-select'];
+        const dropdowns = ['manager-set-select'];
         dropdowns.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
@@ -363,6 +363,72 @@ const app = {
                 el.value = currentVal;
             }
         });
+        this.renderQuizSetCardsGrid();
+    },
+
+    renderQuizSetCardsGrid: function() {
+        const grid = document.getElementById('quiz-set-cards-grid');
+        if (!grid) return;
+
+        const sets = (this.state.wordSets && this.state.wordSets.length > 0) ? this.state.wordSets : PRESET_WORD_SETS;
+        
+        // Auto-select first set if none selected
+        if (!this.state.quizSetId && sets.length > 0) {
+            this.state.quizSetId = sets[0].id;
+        }
+
+        const favCount = this.state.favorites ? this.state.favorites.length : 0;
+        const unmemCount = this.state.unmemorized ? this.state.unmemorized.length : 0;
+        const bookmarkTotal = favCount + unmemCount;
+
+        let html = '';
+
+        if (bookmarkTotal > 0) {
+            const isSelected = this.state.quizSetId === 'bookmarks';
+            html += `
+                <div onclick="app.selectQuizSetCard('bookmarks')" class="cursor-pointer p-3.5 rounded-2xl border ${isSelected ? 'border-pink-500 bg-pink-500/10 shadow-md' : 'border-purple-500/20 glass-panel'} flex items-center justify-between transition-all active:scale-95">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center font-extrabold text-sm shrink-0">
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <h4 class="font-bold text-xs truncate">💖 중요 & 미암기 복습 단어장</h4>
+                            <p class="typo-muted text-[11px]">${bookmarkTotal}개 복습 단어 모음</p>
+                        </div>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-pink-500 bg-pink-500 text-white' : 'border-slate-300 dark:border-slate-600'} flex items-center justify-center text-[10px] shrink-0">
+                        ${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += sets.map(set => {
+            const isSelected = this.state.quizSetId == set.id;
+            return `
+                <div onclick="app.selectQuizSetCard('${set.id}')" class="cursor-pointer p-3.5 rounded-2xl border ${isSelected ? 'border-purple-500 bg-purple-500/10 shadow-md' : 'border-purple-500/20 glass-panel'} flex items-center justify-between transition-all active:scale-95">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-extrabold text-sm shrink-0">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                        <div class="text-left overflow-hidden">
+                            <h4 class="font-bold text-xs truncate">${this.escapeHtml(set.title)}</h4>
+                            <p class="typo-muted text-[11px]">${set.word_count || (set.words ? set.words.length : 30)}단어</p>
+                        </div>
+                    </div>
+                    <div class="w-5 h-5 rounded-full border-2 ${isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-300 dark:border-slate-600'} flex items-center justify-center text-[10px] shrink-0">
+                        ${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        grid.innerHTML = html;
+    },
+
+    selectQuizSetCard: function(setId) {
+        this.state.quizSetId = setId;
+        this.renderQuizSetCardsGrid();
     },
 
     openCreateSetModal: function() {
@@ -765,24 +831,31 @@ const app = {
 
     // ------------------ QUIZ ENGINE & TESTING SUITE ------------------
     startQuiz: async function() {
-        const setSelect = document.getElementById('quiz-set-select');
         const selectedType = document.querySelector('input[name="quiz-type"]:checked').value;
-        const setId = setSelect.value;
+        const setId = this.state.quizSetId;
 
         if (!setId) {
             this.showToast("테스트할 단어장을 선택해주세요.", "error");
             return;
         }
 
-        const targetSet = this.state.wordSets.find(s => s.id == setId) || PRESET_WORD_SETS.find(s => s.id == setId);
-        const words = targetSet ? targetSet.words || [] : [];
+        let words = [];
+        if (setId === 'bookmarks') {
+            const favs = this.state.favorites || [];
+            const unmems = this.state.unmemorized || [];
+            const map = new Map();
+            [...favs, ...unmems].forEach(w => map.set(w.word.toLowerCase(), w));
+            words = Array.from(map.values());
+        } else {
+            const targetSet = this.state.wordSets.find(s => s.id == setId) || PRESET_WORD_SETS.find(s => s.id == setId);
+            words = targetSet ? targetSet.words || [] : [];
+        }
 
         if (words.length < 2) {
             this.showToast("테스트 진행을 위해 최소 2개 이상의 단어가 필요합니다.", "error");
             return;
         }
 
-        this.state.quizSetId = setId;
         this.state.quizType = selectedType;
         this.state.quizQuestions = [...words].sort(() => 0.5 - Math.random());
         this.state.quizCurrentIndex = 0;

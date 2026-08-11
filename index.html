@@ -10,7 +10,7 @@
     <!-- Font Awesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Pretendard & Inter Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css?v=0.1.8">
+    <link rel="stylesheet" href="css/styles.css?v=0.2.0">
 </head>
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
@@ -26,7 +26,7 @@
                     <h1 class="text-lg sm:text-xl font-extrabold tracking-tight font-heading">
                         English Memory
                     </h1>
-                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.1</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full badge-soft font-bold tracking-wide">v0.2</span>
                 </div>
             </div>
 
@@ -99,7 +99,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 p-8 sm:p-12 md:p-14 min-h-[250px] rounded-3xl shadow-xl relative overflow-hidden text-white">
                 <div class="space-y-3 z-10">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold shadow-sm">
-                        <span>✨ ver. 0.1 | 만든이: 북극곰</span>
+                        <span>✨ ver. 0.2 | 만든이: 북극곰</span>
                     </div>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white flex items-center gap-2 tracking-tight">
                         It's Leviosa, Not Leviosaaah! 💖
@@ -326,16 +326,16 @@
                     <div class="w-14 h-14 rounded-3xl btn-primary mx-auto flex items-center justify-center text-2xl shadow-lg">
                         <i class="fa-solid fa-gamepad text-white"></i>
                     </div>
-                    <h2 class="text-2xl font-bold">입시 영단어 테스트 💖</h2>
+                    <h2 class="text-2xl font-bold">얼마나 외웠나 볼까? 💖</h2>
                     <p class="typo-muted">단어장을 선택하고 맞춤형 퀴즈로 실력을 테스트해보세요!</p>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block typo-caption mb-2">1. 테스트할 단어장 선택</label>
-                        <select id="quiz-set-select" class="w-full text-xs rounded-2xl px-4 py-3 focus:outline-none">
-                            <!-- Options -->
-                        </select>
+                        <label class="block typo-caption mb-2">1. 테스트할 단어장 선택 (터치하여 선택)</label>
+                        <div id="quiz-set-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+                            <!-- Populated dynamically via JS -->
+                        </div>
                     </div>
 
                     <div>
@@ -451,7 +451,7 @@
     <audio id="app-audio-player" playsinline preload="auto" class="hidden"></audio>
 
     <!-- JS Scripts -->
-    <script src="js/config.js?v=0.1.8"></script>
-    <script src="js/app.js?v=0.1.8"></script>
+    <script src="js/config.js?v=0.2.0"></script>
+    <script src="js/app.js?v=0.2.0"></script>
 </body>
 </html>
