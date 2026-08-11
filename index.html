@@ -10,7 +10,7 @@
     <!-- Font Awesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Pretendard & Inter Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css?v=0.1.6">
+    <link rel="stylesheet" href="css/styles.css?v=0.1.7">
 </head>
 <body class="min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
@@ -127,25 +127,29 @@
 
         <!-- ==================== VIEW 2: FLASHCARD STUDY MODE ==================== -->
         <section id="view-study" class="hidden space-y-6">
-            <!-- Study Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-3xl">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span id="study-set-title" class="text-lg font-bold">단어 세트 선택</span>
-                        <span id="study-progress-counter" class="text-xs font-extrabold px-3 py-1 rounded-full badge-soft">0 / 0</span>
+            <!-- Study Header Panel -->
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-500/20 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-purple-500"></i>
+                            <span id="study-set-title">플래시카드 학습 🌸</span>
+                            <span id="study-progress-counter" class="text-xs font-extrabold px-3 py-1 rounded-full badge-soft ml-1">0 / 0</span>
+                        </h2>
+                        <p id="study-set-desc" class="typo-muted mt-1">플래시카드를 터치하면 뒤집어져서 뜻과 예문이 나타나요!</p>
                     </div>
-                    <p id="study-set-desc" class="typo-muted mt-1">플래시카드를 터치하면 뒤집어져서 뜻과 예문이 나타나요! 🌸</p>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <select id="study-set-select" onchange="app.loadStudySet(this.value)" class="text-xs font-bold rounded-2xl px-3.5 py-2.5 focus:outline-none">
-                        <!-- Options -->
-                    </select>
-                    <button onclick="app.shuffleStudyWords()" title="단어 순서 섞기" class="p-2.5 rounded-2xl glass-panel hover:bg-purple-500/10 transition">
-                        <i class="fa-solid fa-shuffle text-purple-500"></i>
-                    </button>
+                    
+                    <div class="flex items-center gap-2">
+                        <select id="study-set-select" onchange="app.loadStudySet(this.value)" class="text-xs font-bold rounded-2xl px-3.5 py-2.5 focus:outline-none">
+                            <!-- Options -->
+                        </select>
+                        <button onclick="app.shuffleStudyWords()" title="단어 순서 섞기" class="p-2.5 rounded-2xl glass-panel hover:bg-purple-500/10 transition">
+                            <i class="fa-solid fa-shuffle text-purple-500"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
+
 
             <!-- Progress Bar -->
             <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
@@ -448,7 +452,7 @@
     <audio id="app-audio-player" playsinline preload="auto" class="hidden"></audio>
 
     <!-- JS Scripts -->
-    <script src="js/config.js?v=0.1.6"></script>
-    <script src="js/app.js?v=0.1.6"></script>
+    <script src="js/config.js?v=0.1.7"></script>
+    <script src="js/app.js?v=0.1.7"></script>
 </body>
 </html>
