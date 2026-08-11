@@ -141,21 +141,37 @@ const app = {
     checkServerHealth: async function() {
         const dot = document.getElementById("server-status-dot");
         const text = document.getElementById("server-status-text");
+        if (!dot || !text) return;
+
         try {
             const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 6000);
-            const res = await fetch(`${API_BASE_URL}/sets`, { signal: controller.signal });
+            const timer = setTimeout(() => controller.abort(), 4000);
+            
+            // Try fast health endpoint first
+            let res = await fetch(`${API_BASE_URL}/health`, { signal: controller.signal }).catch(() => null);
+            if (!res || !res.ok) {
+                res = await fetch(`${API_BASE_URL}/sets`, { signal: controller.signal }).catch(() => null);
+            }
             clearTimeout(timer);
-            if (res.ok) {
+
+            if (res && res.ok) {
                 dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-                text.textContent = "연결됨";
+                text.textContent = "온라인 연결됨";
+                // Re-check periodically every 30 seconds
+                if (this._healthTimer) clearTimeout(this._healthTimer);
+                this._healthTimer = setTimeout(() => this.checkServerHealth(), 30000);
             } else {
-                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-                text.textContent = "오프라인/대기 중";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+                text.textContent = "서버 준비 중 (오프라인 학습 가능)";
+                // Auto-retry polling every 4 seconds until connected
+                if (this._healthTimer) clearTimeout(this._healthTimer);
+                this._healthTimer = setTimeout(() => this.checkServerHealth(), 4000);
             }
         } catch (e) {
-            dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+            dot.className = "w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse";
             text.textContent = "오프라인 모드 (오프라인 학습 가능)";
+            if (this._healthTimer) clearTimeout(this._healthTimer);
+            this._healthTimer = setTimeout(() => this.checkServerHealth(), 4000);
         }
     },
 
@@ -872,4 +888,14 @@ const app = {
 
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
+
+    // Mobile tab wake & visibility listeners for instant reconnection
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            app.checkServerHealth();
+        }
+    });
+    window.addEventListener('pageshow', () => {
+        app.checkServerHealth();
+    });
 });
