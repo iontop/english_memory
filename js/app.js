@@ -110,6 +110,7 @@ const app = {
     init: function() {
         console.log("Initializing English Memory App with API:", API_BASE_URL);
         this.initTheme();
+        this.initMobileAudioUnlock();
         this.initBookmarks();
         this.loadWordSets(); // Immediately load presets so UI renders with 0ms delay!
         this.checkServerHealth();
@@ -538,30 +539,33 @@ const app = {
         this.showToast("단어 순서를 섞었습니다. ✨", "info");
     },
 
+    initMobileAudioUnlock: function() {
+        const unlock = () => {
+            const player = document.getElementById("app-audio-player");
+            if (player) {
+                player.play().then(() => player.pause()).catch(() => {});
+            }
+            if ('speechSynthesis' in window) {
+                try {
+                    const dummy = new SpeechSynthesisUtterance('');
+                    dummy.volume = 0;
+                    window.speechSynthesis.speak(dummy);
+                    window.speechSynthesis.getVoices();
+                } catch (e) {}
+            }
+            document.removeEventListener('touchstart', unlock);
+            document.removeEventListener('click', unlock);
+        };
+        document.addEventListener('touchstart', unlock, { once: true, passive: true });
+        document.addEventListener('click', unlock, { once: true, passive: true });
+    },
+
     playCurrentWordAudio: function() {
         const words = this.state.currentStudyWords;
         const idx = this.state.currentStudyIndex;
         if (!words || !words[idx]) return;
 
-        const audioUrl = words[idx].audio_url;
-        const wordText = words[idx].word;
-
-        if (audioUrl) {
-            const audio = new Audio(audioUrl);
-            audio.play().catch(e => {
-                this.playWebSpeechFallback(wordText);
-            });
-        } else {
-            this.playWebSpeechFallback(wordText);
-        }
-    },
-
-    playWebSpeechFallback: function(text) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            window.speechSynthesis.speak(utterance);
-        }
+        this.playAudioUrl(words[idx].audio_url, words[idx].word);
     },
 
     bindKeyboardShortcuts: function() {
@@ -697,11 +701,49 @@ const app = {
     },
 
     playAudioUrl: function(url, text) {
-        if (url) {
-            const audio = new Audio(url);
-            audio.play().catch(e => this.playWebSpeechFallback(text));
+        const cleanText = text || "";
+        const player = document.getElementById("app-audio-player");
+
+        if (url && player) {
+            try {
+                player.src = url;
+                player.currentTime = 0;
+                player.setAttribute("playsinline", "true");
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.warn("Mobile HTML5 Audio play prevented, switching to WebSpeech", err);
+                        this.playWebSpeechFallback(cleanText);
+                    });
+                }
+            } catch (e) {
+                this.playWebSpeechFallback(cleanText);
+            }
         } else {
-            this.playWebSpeechFallback(text);
+            this.playWebSpeechFallback(cleanText);
+        }
+    },
+
+    playWebSpeechFallback: function(text) {
+        if (!text || !('speechSynthesis' in window)) return;
+
+        try {
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            if (voices && voices.length > 0) {
+                const enVoice = voices.find(v => v.lang && (v.lang.startsWith('en') || v.lang.includes('en_US') || v.name.includes('Samantha') || v.name.includes('Siri')));
+                if (enVoice) utterance.voice = enVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.error("Speech Synthesis mobile error", e);
         }
     },
 
